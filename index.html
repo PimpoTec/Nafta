@@ -12,7 +12,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="MiClio">
 
-  <!-- Google Fonts (Inter / Plus Jakarta Sans style like MiPlata) -->
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -36,7 +36,7 @@
               200: '#c7d8ce',
               300: '#a1beae',
               400: '#789e8a',
-              500: '#5b826e', /* Verde Clio Metalizado */
+              500: '#5b826e',
               600: '#476857',
               700: '#3a5447',
               800: '#30443a',
@@ -60,7 +60,6 @@
     .safe-bottom {
       padding-bottom: env(safe-area-inset-bottom, 12px);
     }
-    /* Transición suave para la aguja del medidor */
     #gaugeNeedle {
       transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
       transform-origin: 100px 95px;
@@ -76,11 +75,10 @@
 
 <body class="bg-[#f4f6f4] dark:bg-[#121614] text-gray-900 dark:text-gray-100 font-sans antialiased min-h-screen transition-colors duration-200">
 
-  <!-- HEADER ESTILO MIPLATA -->
+  <!-- HEADER -->
   <header class="sticky top-0 z-30 bg-[#f4f6f4]/90 dark:bg-[#121614]/90 backdrop-blur-md px-4 py-3.5 flex items-center justify-between border-b border-gray-200/70 dark:border-white/5">
     <div class="flex items-center gap-2.5">
-      <!-- Logo Renault / Clio Verde -->
-      <div class="w-9 h-9 rounded-xl bg-clio-500/20 dark:bg-clio-500/20 border border-clio-500/40 flex items-center justify-center text-clio-600 dark:text-clio-300 shadow-sm">
+      <div class="w-9 h-9 rounded-xl bg-clio-500/20 border border-clio-500/40 flex items-center justify-center text-clio-600 dark:text-clio-300 shadow-sm">
         <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
           <path d="M12 2L4.5 12L12 22L19.5 12L12 2ZM12 5.8L16.6 12L12 18.2L7.4 12L12 5.8Z"/>
         </svg>
@@ -92,14 +90,14 @@
         </div>
         <p class="text-[11px] text-gray-500 dark:text-gray-400 flex items-center gap-1">
           <i class="fa-solid fa-gauge-simple-high text-[10px] text-clio-500"></i>
-          Odómetro: <strong id="headerOdometro" class="text-gray-700 dark:text-gray-200">--- km</strong>
+          Tablero: <strong id="headerOdometro" class="text-gray-700 dark:text-gray-200">--- km</strong>
         </p>
       </div>
     </div>
 
     <div class="flex items-center gap-2">
       <button onclick="abrirModalOdometro()" class="text-xs font-semibold px-2.5 py-1.5 rounded-xl bg-white dark:bg-[#1c221f] border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 shadow-sm active:scale-95 transition">
-        <i class="fa-solid fa-pen-to-square text-clio-500 mr-1"></i> Tablero
+        <i class="fa-solid fa-pen-to-square text-clio-500 mr-1"></i> Odómetro
       </button>
       <button onclick="toggleTheme()" class="w-9 h-9 rounded-xl bg-white dark:bg-[#1c221f] border border-gray-200 dark:border-white/10 flex items-center justify-center text-gray-600 dark:text-gray-300 shadow-sm active:scale-95 transition">
         <i id="themeIcon" class="fa-solid fa-sun text-sm text-amber-400"></i>
@@ -107,53 +105,40 @@
     </div>
   </header>
 
-  <!-- CONTENEDOR PRINCIPAL DE VISTAS -->
+  <!-- CONTENEDOR PRINCIPAL -->
   <main class="max-w-md mx-auto px-4 pt-3 space-y-4">
 
-    <!-- ================= SECCIÓN 1: TABLERO (HOME) ================= -->
+    <!-- ================= SECCIÓN 1: TABLERO ================= -->
     <section id="view-tablero" class="space-y-4">
 
-      <!-- CARD PRINCIPAL: MEDIDOR DE COMBUSTIBLE + KM RESTANTES -->
+      <!-- CARD PRINCIPAL: INDICADOR DE COMBUSTIBLE + KM RESTANTES -->
       <div class="bg-[#e3ebe6] dark:bg-[#1c2420] rounded-3xl p-5 border border-clio-300/50 dark:border-clio-700/40 shadow-sm relative overflow-hidden">
         
         <div class="flex justify-between items-center mb-1">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-clio-800/70 dark:text-clio-300/80">Nivel de Combustible</span>
+          <span class="text-[11px] font-bold uppercase tracking-wider text-clio-800/70 dark:text-clio-300/80">Medidor de Combustible</span>
           <span id="badgeEstado" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30">
             Tanque Óptimo
           </span>
         </div>
 
-        <!-- RELOJ INDICADOR DE COMBUSTIBLE (SVG) -->
+        <!-- RELOJ INDICADOR (SVG) -->
         <div class="relative flex flex-col items-center justify-center my-1">
           <svg viewBox="0 0 200 112" class="w-60 h-36 overflow-visible">
-            <!-- Arco de Fondo -->
             <path d="M 20 95 A 80 80 0 0 1 180 95" fill="none" stroke="currentColor" stroke-width="14" stroke-linecap="round" class="text-black/10 dark:text-white/10" />
-            
-            <!-- Zona Roja de Reserva -->
             <path d="M 20 95 A 80 80 0 0 1 36 47" fill="none" stroke="#ef4444" stroke-width="14" stroke-linecap="butt" class="opacity-40" />
-
-            <!-- Arco Dinámico de Nivel -->
             <path id="gaugeArc" d="M 20 95 A 80 80 0 0 1 180 95" fill="none" stroke="#5b826e" stroke-width="14" stroke-linecap="round" stroke-dasharray="251.3" stroke-dashoffset="0" />
 
-            <!-- Marcas del Tablero (Ticks) -->
-            <!-- E (Reserva) -->
+            <!-- Ticks -->
             <text x="8" y="110" class="text-[11px] font-extrabold fill-red-500">R</text>
-            <!-- 1/4 -->
             <line x1="43" y1="38" x2="50" y2="45" stroke="currentColor" stroke-width="2" class="text-gray-500 dark:text-gray-400" />
             <text x="30" y="30" class="text-[9px] font-bold fill-gray-500 dark:fill-gray-400">1/4</text>
-            <!-- 1/2 -->
             <line x1="100" y1="15" x2="100" y2="25" stroke="currentColor" stroke-width="2.5" class="text-gray-600 dark:text-gray-300" />
             <text x="92" y="10" class="text-[10px] font-bold fill-gray-600 dark:fill-gray-300">1/2</text>
-            <!-- 3/4 -->
             <line x1="157" y1="38" x2="150" y2="45" stroke="currentColor" stroke-width="2" class="text-gray-500 dark:text-gray-400" />
             <text x="156" y="30" class="text-[9px] font-bold fill-gray-500 dark:fill-gray-400">3/4</text>
-            <!-- F (Lleno) -->
             <text x="183" y="110" class="text-[11px] font-extrabold fill-clio-700 dark:fill-clio-300">F</text>
 
-            <!-- Ícono Surtidor en el centro del reloj -->
-            <text x="94" y="68" class="text-[12px] fill-clio-700/60 dark:fill-clio-300/60 FontAwesome">&#xf52f;</text>
-
-            <!-- Aguja Indicadora -->
+            <!-- Aguja -->
             <g id="gaugeNeedle" style="transform: rotate(90deg);">
               <polygon points="96,95 100,22 104,95" fill="#ef4444" />
               <circle cx="100" cy="95" r="8" class="fill-gray-800 dark:fill-white" />
@@ -161,7 +146,7 @@
             </g>
           </svg>
 
-          <!-- KM QUE QUEDAN (DEBAJO DEL INDICADOR) -->
+          <!-- KM QUE QUEDAN -->
           <div class="text-center -mt-2">
             <div class="flex items-baseline justify-center gap-1.5">
               <span id="kmRestantes" class="text-5xl font-extrabold tracking-tight text-gray-900 dark:text-white">520</span>
@@ -173,9 +158,9 @@
           </div>
         </div>
 
-        <!-- Selector rápido para ver autonomía según ruta o calle -->
+        <!-- Selector rápido de proyección -->
         <div class="mt-4 pt-3 border-t border-clio-600/15 dark:border-white/10 flex items-center justify-between text-xs">
-          <span class="text-gray-600 dark:text-gray-400 font-medium">Proyectar autonomía en:</span>
+          <span class="text-gray-600 dark:text-gray-400 font-medium">Proyectar km según:</span>
           <div class="flex bg-black/5 dark:bg-black/30 p-0.5 rounded-xl">
             <button onclick="cambiarModoVista('calle')" id="btnVista-calle" class="px-2.5 py-1 rounded-lg font-bold text-[11px] bg-clio-500 text-white transition">Calle</button>
             <button onclick="cambiarModoVista('mixto')" id="btnVista-mixto" class="px-2.5 py-1 rounded-lg font-semibold text-[11px] text-gray-600 dark:text-gray-400 transition">Mixto</button>
@@ -184,19 +169,33 @@
         </div>
       </div>
 
-      <!-- TARJETAS 2x2 ESTILO MIPLATA -->
+      <!-- BANNER DE CICLO ENTRE TANQUES LLENOS (AUDITORÍA DE CONSUMO) -->
+      <div class="bg-white dark:bg-[#1c221f] rounded-2xl p-3.5 border border-gray-200/80 dark:border-white/5 shadow-sm flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-clio-500/15 text-clio-500 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-calculator text-sm"></i>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-gray-900 dark:text-white">Ciclo desde último Tanque Lleno</div>
+            <div id="textoCicloActual" class="text-[11px] text-gray-500 dark:text-gray-400">Sin base de tanque lleno aún</div>
+          </div>
+        </div>
+        <button onclick="abrirModalCarga()" class="text-[11px] font-bold px-2.5 py-1.5 rounded-xl bg-clio-500/15 text-clio-600 dark:text-clio-300 shrink-0">
+          Cargar
+        </button>
+      </div>
+
+      <!-- TARJETAS 2x2 -->
       <div class="grid grid-cols-2 gap-3">
-        <!-- Odómetro Estimado Actual -->
         <div onclick="abrirModalOdometro()" class="bg-white dark:bg-[#1c221f] rounded-2xl p-3.5 border border-gray-200/80 dark:border-white/5 shadow-sm cursor-pointer active:scale-[0.98] transition">
           <div class="flex items-center justify-between">
             <span class="text-[11px] font-semibold text-gray-500 dark:text-gray-400">Odómetro Auto</span>
             <i class="fa-solid fa-car-on text-xs text-clio-500"></i>
           </div>
           <div id="kpiOdometro" class="text-lg font-extrabold text-gray-900 dark:text-white mt-1">--- km</div>
-          <span class="text-[10px] text-clio-600 dark:text-clio-400 font-medium">Tocar para calibrar</span>
+          <span class="text-[10px] text-clio-600 dark:text-clio-400 font-medium">Respaldo anti-reset</span>
         </div>
 
-        <!-- Recorrido desde última carga -->
         <div class="bg-white dark:bg-[#1c221f] rounded-2xl p-3.5 border border-gray-200/80 dark:border-white/5 shadow-sm">
           <div class="flex items-center justify-between">
             <span class="text-[11px] font-semibold text-gray-500 dark:text-gray-400">Parcial Viaje</span>
@@ -206,7 +205,6 @@
           <span class="text-[10px] text-gray-400">Desde última carga</span>
         </div>
 
-        <!-- Consumo Configurado -->
         <div onclick="irASeccion('consumos')" class="bg-white dark:bg-[#1c221f] rounded-2xl p-3.5 border border-gray-200/80 dark:border-white/5 shadow-sm cursor-pointer active:scale-[0.98] transition">
           <div class="flex items-center justify-between">
             <span class="text-[11px] font-semibold text-gray-500 dark:text-gray-400">Consumo Calle</span>
@@ -216,7 +214,6 @@
           <span id="kpiKmPorLitro" class="text-[10px] text-gray-400">10.4 km por litro</span>
         </div>
 
-        <!-- Última Carga -->
         <div onclick="abrirModalCarga()" class="bg-white dark:bg-[#1c221f] rounded-2xl p-3.5 border border-gray-200/80 dark:border-white/5 shadow-sm cursor-pointer active:scale-[0.98] transition">
           <div class="flex items-center justify-between">
             <span class="text-[11px] font-semibold text-gray-500 dark:text-gray-400">Últ. Surtidor</span>
@@ -227,26 +224,24 @@
         </div>
       </div>
 
-      <!-- ÚLTIMOS MOVIMIENTOS (VISTA PREVIA) -->
+      <!-- ÚLTIMOS MOVIMIENTOS -->
       <div class="bg-white dark:bg-[#1c221f] rounded-2xl p-4 border border-gray-200/80 dark:border-white/5 shadow-sm">
         <div class="flex items-center justify-between mb-3">
           <h2 class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Últimos Movimientos</h2>
           <button onclick="irASeccion('historial')" class="text-xs font-bold text-clio-600 dark:text-clio-400">Ver todos</button>
         </div>
-        <div id="listaRecientes" class="space-y-2.5">
-          <!-- Renderizado dinámico -->
-        </div>
+        <div id="listaRecientes" class="space-y-2.5"></div>
       </div>
 
     </section>
 
-    <!-- ================= SECCIÓN 2: HISTORIAL COMPLETO ================= -->
+    <!-- ================= SECCIÓN 2: BITÁCORA ================= -->
     <section id="view-historial" class="hidden space-y-4">
       <div class="bg-white dark:bg-[#1c221f] rounded-2xl p-4 border border-gray-200/80 dark:border-white/5 shadow-sm">
         <div class="flex items-center justify-between mb-3">
           <div>
-            <h2 class="text-base font-extrabold text-gray-900 dark:text-white">Bitácora del Clio</h2>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Constancia de cargas, odómetro y recorridos</p>
+            <h2 class="text-base font-extrabold text-gray-900 dark:text-white">Bitácora y Mediciones</h2>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Viajes, cargas y verificaciones de consumo</p>
           </div>
           <span id="contadorMovimientos" class="text-xs font-bold px-2.5 py-1 rounded-lg bg-clio-500/10 text-clio-600 dark:text-clio-300">0 reg.</span>
         </div>
@@ -256,12 +251,10 @@
 
     <!-- ================= SECCIÓN 3: CONSUMOS Y AJUSTES ================= -->
     <section id="view-consumos" class="hidden space-y-4">
-      
-      <!-- Consumos por Estilo de Manejo -->
       <div class="bg-white dark:bg-[#1c221f] rounded-2xl p-4 border border-gray-200/80 dark:border-white/5 shadow-sm space-y-4">
         <div>
           <h2 class="text-base font-extrabold text-gray-900 dark:text-white">Consumos del Clio 1.6 16v</h2>
-          <p class="text-xs text-gray-500 dark:text-gray-400">Modificá los litros cada 100 km según tu uso</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Modificá manualmente o autocalibrá al llenar el tanque</p>
         </div>
 
         <!-- Calle -->
@@ -272,7 +265,7 @@
             </div>
             <div>
               <div class="text-sm font-bold text-gray-900 dark:text-white">Calle / Urbano</div>
-              <div id="infoRendimientoCalle" class="text-[11px] text-gray-500">10.4 km/L · ~520 km por tanque</div>
+              <div id="infoRendimientoCalle" class="text-[11px] text-gray-500">10.4 km/L · ~520 km</div>
             </div>
           </div>
           <div class="flex items-center gap-1.5">
@@ -289,7 +282,7 @@
             </div>
             <div>
               <div class="text-sm font-bold text-gray-900 dark:text-white">Uso Mixto</div>
-              <div id="infoRendimientoMixto" class="text-[11px] text-gray-500">12.2 km/L · ~610 km por tanque</div>
+              <div id="infoRendimientoMixto" class="text-[11px] text-gray-500">12.2 km/L · ~610 km</div>
             </div>
           </div>
           <div class="flex items-center gap-1.5">
@@ -306,7 +299,7 @@
             </div>
             <div>
               <div class="text-sm font-bold text-gray-900 dark:text-white">Ruta / Autopista</div>
-              <div id="infoRendimientoRuta" class="text-[11px] text-gray-500">14.7 km/L · ~735 km por tanque</div>
+              <div id="infoRendimientoRuta" class="text-[11px] text-gray-500">14.7 km/L · ~735 km</div>
             </div>
           </div>
           <div class="flex items-center gap-1.5">
@@ -332,33 +325,26 @@
         </button>
       </div>
 
-      <!-- Apariencia y Respaldo -->
+      <!-- Apariencia y Reset -->
       <div class="bg-white dark:bg-[#1c221f] rounded-2xl p-4 border border-gray-200/80 dark:border-white/5 shadow-sm space-y-3">
         <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400">General</h3>
-        
         <div class="flex items-center justify-between py-1">
-          <span class="text-sm font-semibold">Modo Oscuro</span>
-          <button onclick="toggleTheme()" class="px-3 py-1.5 rounded-xl bg-gray-100 dark:bg-white/10 text-xs font-bold">
-            Cambiar tema
-          </button>
+          <span class="text-sm font-semibold">Cambiar Tema (Oscuro / Claro)</span>
+          <button onclick="toggleTheme()" class="px-3 py-1.5 rounded-xl bg-gray-100 dark:bg-white/10 text-xs font-bold">Alternar</button>
         </div>
-
         <div class="flex items-center justify-between py-1 border-t border-gray-100 dark:border-white/5 pt-3">
           <div>
             <div class="text-sm font-semibold text-red-500">Reiniciar App de Cero</div>
             <div class="text-[11px] text-gray-400">Borra historial y vuelve a 50L</div>
           </div>
-          <button onclick="resetearAppCompleta()" class="px-3 py-1.5 rounded-xl bg-red-500/10 text-red-500 text-xs font-bold">
-            Resetear
-          </button>
+          <button onclick="resetearAppCompleta()" class="px-3 py-1.5 rounded-xl bg-red-500/10 text-red-500 text-xs font-bold">Resetear</button>
         </div>
       </div>
-
     </section>
 
   </main>
 
-  <!-- BOTÓN FLOTANTE (+) PARA CARGAR RECORRIDO (ESTILO MIPLATA) -->
+  <!-- BOTÓN FLOTANTE (+) PARA CARGAR RECORRIDO -->
   <button onclick="abrirModalViaje()" aria-label="Cargar recorrido" class="fixed right-5 bottom-24 z-40 w-14 h-14 rounded-full bg-clio-500 hover:bg-clio-600 text-white shadow-xl shadow-clio-950/50 flex items-center justify-center text-2xl active:scale-90 transition">
     <i class="fa-solid fa-plus"></i>
   </button>
@@ -386,12 +372,10 @@
   </nav>
 
   <!-- =======================================================================
-       MODAL 1: NUEVO RECORRIDO (+) CON TECLADO NUMÉRICO (IDÉNTICO A MIPLATA)
+       MODAL 1: NUEVO RECORRIDO (+) CON TECLADO NUMÉRICO
        ======================================================================= -->
   <div id="modalViaje" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex flex-col justify-end">
-    <div class="bg-[#f4f6f4] dark:bg-[#161b18] w-full max-w-md mx-auto rounded-t-3xl p-5 shadow-2xl border-t border-white/10 space-y-3.5 animate-slide-up">
-      
-      <!-- Cabecera Modal -->
+    <div class="bg-[#f4f6f4] dark:bg-[#161b18] w-full max-w-md mx-auto rounded-t-3xl p-5 shadow-2xl border-t border-white/10 space-y-3.5">
       <div class="flex items-center justify-between">
         <button onclick="cerrarModalViaje()" class="w-8 h-8 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-600 dark:text-gray-300">
           <i class="fa-solid fa-xmark"></i>
@@ -400,7 +384,6 @@
         <div class="w-8"></div>
       </div>
 
-      <!-- Display de KM estilo MiPlata -->
       <div class="bg-white dark:bg-[#1f2622] rounded-2xl p-3.5 border border-gray-200 dark:border-white/10 flex items-center justify-between">
         <div>
           <span class="text-[10px] font-bold uppercase text-gray-400 block">Kilómetros recorridos</span>
@@ -415,7 +398,6 @@
         </div>
       </div>
 
-      <!-- Atajos rápidos de KM -->
       <div class="grid grid-cols-4 gap-2">
         <button onclick="setQuickKm('5')" class="py-1.5 rounded-xl bg-white dark:bg-[#1f2622] border border-gray-200 dark:border-white/5 text-xs font-bold text-clio-600 dark:text-clio-300">+5 km</button>
         <button onclick="setQuickKm('10')" class="py-1.5 rounded-xl bg-white dark:bg-[#1f2622] border border-gray-200 dark:border-white/5 text-xs font-bold text-clio-600 dark:text-clio-300">+10 km</button>
@@ -423,9 +405,8 @@
         <button onclick="setQuickKm('50')" class="py-1.5 rounded-xl bg-white dark:bg-[#1f2622] border border-gray-200 dark:border-white/5 text-xs font-bold text-clio-600 dark:text-clio-300">+50 km</button>
       </div>
 
-      <!-- Selector de Estilo de Manejo (Predeterminado: Calle) -->
       <div>
-        <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 block mb-1.5">Estilo de manejo</span>
+        <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 block mb-1.5">Estilo de manejo (predeterminado Calle)</span>
         <div class="grid grid-cols-3 gap-2">
           <button onclick="seleccionarEstiloViaje('calle')" id="chipEstilo-calle" class="py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 bg-clio-500 text-white shadow-sm">
             <i class="fa-solid fa-traffic-light"></i> Calle
@@ -439,15 +420,12 @@
         </div>
       </div>
 
-      <!-- Nota opcional -->
-      <input type="text" id="inputNotaViaje" placeholder="Nota opcional (ej. Facu, Centro, Aeródromo...)" class="w-full bg-white dark:bg-[#1f2622] border border-gray-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-gray-800 dark:text-gray-100 outline-none">
+      <input type="text" id="inputNotaViaje" placeholder="Nota opcional (ej. Trabajo, Centro, Paseo...)" class="w-full bg-white dark:bg-[#1f2622] border border-gray-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-gray-800 dark:text-gray-100 outline-none">
 
-      <!-- Botón Confirmar -->
       <button onclick="guardarViaje()" class="w-full py-3.5 rounded-2xl bg-clio-500 hover:bg-clio-600 text-white font-extrabold text-sm shadow-lg active:scale-95 transition">
         Descontar Recorrido
       </button>
 
-      <!-- Teclado Numérico Estilo MiPlata -->
       <div class="grid grid-cols-3 gap-2 pt-1 safe-bottom">
         <button onclick="teclaViaje('1')" class="numpad-btn py-3 rounded-xl bg-white dark:bg-[#1f2622] font-bold text-lg shadow-sm">1</button>
         <button onclick="teclaViaje('2')" class="numpad-btn py-3 rounded-xl bg-white dark:bg-[#1f2622] font-bold text-lg shadow-sm">2</button>
@@ -466,10 +444,10 @@
   </div>
 
   <!-- =======================================================================
-       MODAL 2: CARGAR COMBUSTIBLE (TANQUE LLENO O PARCIAL + KM TABLERO)
+       MODAL 2: CARGAR COMBUSTIBLE (PIDE LITROS EN TANQUE LLENO Y CALCULA CONSUMO)
        ======================================================================= -->
-  <div id="modalCarga" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-[#f4f6f4] dark:bg-[#181e1b] w-full max-w-sm rounded-3xl p-5 shadow-2xl border border-white/10 space-y-4">
+  <div id="modalCarga" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-[#f4f6f4] dark:bg-[#181e1b] w-full max-w-sm rounded-3xl p-5 shadow-2xl border border-white/10 space-y-4 my-auto">
       <div class="flex items-center justify-between">
         <h3 class="text-base font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
           <i class="fa-solid fa-gas-pump text-clio-500"></i> Cargar Combustible
@@ -479,36 +457,55 @@
         </button>
       </div>
 
-      <!-- Selector: Tanque Lleno vs Carga Parcial -->
+      <!-- Selector: Tanque Lleno vs Parcial -->
       <div class="grid grid-cols-2 gap-2 p-1 bg-gray-200 dark:bg-[#111513] rounded-2xl">
         <button onclick="setTipoCarga('lleno')" id="tabCarga-lleno" class="py-2.5 rounded-xl font-bold text-xs bg-clio-500 text-white shadow">
-          ¡Tanque Lleno! (50L)
+          ¡Tanque Lleno!
         </button>
         <button onclick="setTipoCarga('parcial')" id="tabCarga-parcial" class="py-2.5 rounded-xl font-bold text-xs text-gray-600 dark:text-gray-400">
           Carga Parcial
         </button>
       </div>
 
-      <!-- Bloque exclusivo Carga Parcial -->
-      <div id="bloqueCargaParcial" class="hidden space-y-2.5">
-        <label class="text-xs font-bold text-gray-500 dark:text-gray-400 block">¿Cuántos litros entraron?</label>
-        <input type="number" step="0.1" id="inputLitrosCarga" placeholder="Ej: 20" class="w-full bg-white dark:bg-[#222a26] border border-gray-300 dark:border-white/10 rounded-xl p-3 text-lg font-extrabold text-center outline-none focus:ring-2 focus:ring-clio-500">
-        <div class="grid grid-cols-4 gap-1.5">
-          <button onclick="document.getElementById('inputLitrosCarga').value = 10" class="py-1.5 rounded-lg bg-white dark:bg-white/5 text-xs font-bold border border-gray-200 dark:border-white/10">+10 L</button>
-          <button onclick="document.getElementById('inputLitrosCarga').value = 12.5" class="py-1.5 rounded-lg bg-white dark:bg-white/5 text-xs font-bold border border-gray-200 dark:border-white/10">+1/4</button>
-          <button onclick="document.getElementById('inputLitrosCarga').value = 25" class="py-1.5 rounded-lg bg-white dark:bg-white/5 text-xs font-bold border border-gray-200 dark:border-white/10">+1/2</button>
-          <button onclick="document.getElementById('inputLitrosCarga').value = 35" class="py-1.5 rounded-lg bg-white dark:bg-white/5 text-xs font-bold border border-gray-200 dark:border-white/10">+35 L</button>
+      <!-- Input de Litros (Ahora se pide TANTO en lleno como en parcial) -->
+      <div id="contenedorInputLitros" class="space-y-2">
+        <div class="flex items-center justify-between">
+          <label id="labelLitrosSurtidor" class="text-xs font-bold text-gray-600 dark:text-gray-300">
+            ¿Cuántos litros entraron en el surtidor?
+          </label>
+          <span id="sugerenciaLitros" class="text-[10px] font-semibold text-clio-500"></span>
         </div>
+        <input type="number" step="0.01" id="inputLitrosCarga" placeholder="Ej: 38.5" class="w-full bg-white dark:bg-[#222a26] border border-gray-300 dark:border-white/10 rounded-xl p-3 text-lg font-extrabold text-center outline-none focus:ring-2 focus:ring-clio-500">
+        
+        <!-- Opción para cuando es el 1er tanque lleno y no sabemos los litros previos -->
+        <label id="checkPrimerLlenoWrapper" class="flex items-center gap-2 text-[11px] text-gray-500 dark:text-gray-400 pt-0.5 cursor-pointer">
+          <input type="checkbox" id="checkPrimerLleno" onchange="togglePrimerLleno()" class="rounded text-clio-500 focus:ring-clio-500">
+          <span>No sé cuántos litros entraron / Solo iniciar ciclo a 50L</span>
+        </label>
       </div>
 
-      <!-- Input obligatorio: KM del Tablero (Constancia por si se reinicia) -->
+      <!-- Input obligatorio: KM del Tablero -->
       <div class="space-y-1.5">
         <label class="text-xs font-bold text-gray-600 dark:text-gray-300 flex items-center justify-between">
           <span>Km actuales en el tablero</span>
-          <span class="text-[10px] font-semibold text-clio-500">Respaldo anti-reset</span>
+          <span class="text-[10px] font-semibold text-clio-500">Obligatorio</span>
         </label>
-        <input type="number" id="inputOdometroCarga" placeholder="Ej: 184520" class="w-full bg-white dark:bg-[#222a26] border border-gray-300 dark:border-white/10 rounded-xl p-3 text-lg font-extrabold text-center outline-none focus:ring-2 focus:ring-clio-500">
-        <p class="text-[11px] text-gray-500 dark:text-gray-400">Queda registrado a qué kilometraje cargaste por si el odómetro parcial vuelve a cero.</p>
+        <input type="number" id="inputOdometroCarga" placeholder="Ej: 185420" class="w-full bg-white dark:bg-[#222a26] border border-gray-300 dark:border-white/10 rounded-xl p-3 text-lg font-extrabold text-center outline-none focus:ring-2 focus:ring-clio-500">
+      </div>
+
+      <!-- Selector de Uso del Tanque (Para saber si fue un mismo tipo de uso al cerrar tanque lleno) -->
+      <div id="bloqueUsoTanque" class="space-y-1.5 pt-1 border-t border-gray-200 dark:border-white/10">
+        <label class="text-xs font-bold text-gray-600 dark:text-gray-300 block">
+          ¿Qué uso tuvo el auto desde el último lleno?
+        </label>
+        <select id="selectUsoCiclo" class="w-full bg-white dark:bg-[#222a26] border border-gray-300 dark:border-white/10 rounded-xl p-2.5 text-xs font-bold text-gray-800 dark:text-gray-100 outline-none">
+          <option value="auto">Detectar según mis viajes cargados</option>
+          <option value="calle">100% Calle / Urbano (Verificar consumo Calle)</option>
+          <option value="mixto">Uso Mixto parejo (Verificar consumo Mixto)</option>
+          <option value="ruta">100% Ruta / Autopista (Verificar consumo Ruta)</option>
+          <option value="combinado">Mezclado irregular (No actualizar promedios)</option>
+        </select>
+        <p id="previewCicloInfo" class="text-[11px] text-gray-500 dark:text-gray-400"></p>
       </div>
 
       <button onclick="confirmarCargaCombustible()" class="w-full py-3.5 rounded-2xl bg-clio-500 hover:bg-clio-600 text-white font-extrabold text-sm shadow-lg active:scale-95 transition">
@@ -518,7 +515,40 @@
   </div>
 
   <!-- =======================================================================
-       MODAL 3: PEDIR ODÓMETRO AL ENTRAR (SI NO ESTÁ CARGADO O CALIBRAR)
+       MODAL 3: RESULTADO DE VERIFICACIÓN DE CONSUMO REAL (CORTE A CORTE)
+       ======================================================================= -->
+  <div id="modalResultadoConsumo" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-[#181e1b] w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-clio-500/40 space-y-4 text-center">
+      <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 text-emerald-500 flex items-center justify-center mx-auto text-2xl">
+        <i class="fa-solid fa-chart-line"></i>
+      </div>
+
+      <div>
+        <span class="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-clio-500/20 text-clio-400">Verificación de Tanque Lleno</span>
+        <h3 class="text-lg font-extrabold text-gray-900 dark:text-white mt-2">Consumo Real Medido</h3>
+        <p id="resumenMatematicoCiclo" class="text-xs text-gray-500 dark:text-gray-400 mt-1"></p>
+      </div>
+
+      <div class="bg-gray-100 dark:bg-[#121614] rounded-2xl p-4 border border-gray-200 dark:border-white/5">
+        <div class="text-3xl font-black text-clio-600 dark:text-clio-300" id="valorConsumoReal">9.4 L/100km</div>
+        <div class="text-xs font-bold text-gray-500 mt-0.5" id="valorRendimientoReal">10.6 km por litro</div>
+      </div>
+
+      <div id="bloqueActualizacionPromedio" class="space-y-2">
+        <p id="textoComparacionPromedio" class="text-xs text-gray-600 dark:text-gray-300"></p>
+        <button id="btnAplicarNuevoConsumo" class="w-full py-3 rounded-2xl bg-clio-500 hover:bg-clio-600 text-white font-extrabold text-xs shadow-md active:scale-95 transition">
+          Actualizar consumo con este valor
+        </button>
+      </div>
+
+      <button onclick="cerrarModalResultadoConsumo()" class="w-full py-2.5 rounded-xl border border-gray-300 dark:border-white/10 text-xs font-bold text-gray-500 dark:text-gray-400">
+        Cerrar y mantener actual
+      </button>
+    </div>
+  </div>
+
+  <!-- =======================================================================
+       MODAL 4: PEDIR ODÓMETRO INICIAL AL ENTRAR
        ======================================================================= -->
   <div id="modalOdometroInicial" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white dark:bg-[#181e1b] w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-clio-500/30 space-y-4 text-center">
@@ -528,7 +558,7 @@
       <div>
         <h3 class="text-lg font-extrabold text-gray-900 dark:text-white">Kilometraje del Tablero</h3>
         <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-          Ingresá cuántos kilómetros marca hoy el odómetro total de tu Clio para llevar una constancia exacta ante cualquier reinicio.
+          Ingresá cuántos kilómetros marca hoy el odómetro de tu Clio para dejar constancia ante reinicios y medir consumos entre tanques llenos.
         </p>
       </div>
 
@@ -542,30 +572,46 @@
 
   <!-- LÓGICA DE LA APLICACIÓN -->
   <script>
-    const STORAGE_KEY = 'miclio_v2_data';
+    const STORAGE_KEY = 'miclio_v3_data';
 
     const defaultData = {
       theme: 'dark',
       capacidadTanque: 50.0,
       litrosActuales: 50.0,
       kmParcialDesdeCarga: 0.0,
-      odometroActual: null, // Si es null, lo pide al entrar
+      odometroActual: null,
       ultimaCargaOdometro: null,
       ultimaCargaTipo: 'Sin registros',
-      modoVistaAutonomia: 'calle', // 'calle' | 'mixto' | 'ruta'
+      modoVistaAutonomia: 'calle',
       consumos: {
         calle: 9.6,
         mixto: 8.2,
         ruta: 6.8
       },
+      // Seguimiento entre Tanque Lleno y Tanque Lleno
+      cicloLleno: {
+        activo: true,
+        odometroInicioLleno: null, // Odómetro cuando se llenó por última vez
+        litrosParcialesAcumulados: 0.0, // Suma de cargas parciales hechas en el medio
+        kmPorEstilo: { calle: 0, mixto: 0, ruta: 0 } // Viajes registrados desde el último lleno
+      },
       historial: []
     };
 
-    let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultData;
+    // Migración suave si ya tenía datos de la v2
+    let saved = JSON.parse(localStorage.getItem(STORAGE_KEY)) || JSON.parse(localStorage.getItem('miclio_v2_data'));
+    let state = Object.assign({}, defaultData, saved || {});
+    if (!state.cicloLleno) {
+      state.cicloLleno = {
+        activo: true,
+        odometroInicioLleno: state.ultimaCargaOdometro || state.odometroActual,
+        litrosParcialesAcumulados: 0,
+        kmPorEstilo: { calle: 0, mixto: 0, ruta: 0 }
+      };
+    }
 
-    // Variables temporales del modal de viaje
     let bufferViajeKm = '0';
-    let estiloViajeSeleccionado = 'calle'; // Predeterminado calle
+    let estiloViajeSeleccionado = 'calle';
     let tipoCargaSeleccionado = 'lleno';
 
     function saveState() {
@@ -573,7 +619,7 @@
       renderAll();
     }
 
-    // ==================== TEMA OSCURO / CLARO ====================
+    // ==================== TEMA ====================
     function applyTheme() {
       const html = document.documentElement;
       const icon = document.getElementById('themeIcon');
@@ -592,7 +638,7 @@
       saveState();
     }
 
-    // ==================== RENDERIZADO PRINCIPAL ====================
+    // ==================== RENDERIZADO ====================
     function renderAll() {
       applyTheme();
 
@@ -600,38 +646,29 @@
       const litros = Math.max(0, Math.min(cap, state.litrosActuales));
       const pct = Math.max(0, Math.min(100, (litros / cap) * 100));
 
-      // Consumo según la vista elegida en el tablero
       const consumoActivo = state.consumos[state.modoVistaAutonomia] || state.consumos.calle;
       const kmPorLitroActivo = 100 / consumoActivo;
       const kmRestantes = Math.round(litros * kmPorLitroActivo);
 
-      // Textos principales
       document.getElementById('kmRestantes').innerText = kmRestantes;
       document.getElementById('litrosRestantes').innerText = `${litros.toFixed(1)} L`;
       document.getElementById('porcentajeTanque').innerText = `${Math.round(pct)}%`;
       document.getElementById('modoAutonomiaLabel').innerText =
         state.modoVistaAutonomia.charAt(0).toUpperCase() + state.modoVistaAutonomia.slice(1);
 
-      // Botones de proyección de autonomía
       ['calle', 'mixto', 'ruta'].forEach(m => {
         const btn = document.getElementById(`btnVista-${m}`);
-        if (state.modoVistaAutonomia === m) {
-          btn.className = 'px-2.5 py-1 rounded-lg font-bold text-[11px] bg-clio-500 text-white transition';
-        } else {
-          btn.className = 'px-2.5 py-1 rounded-lg font-semibold text-[11px] text-gray-600 dark:text-gray-400 transition';
-        }
+        btn.className = state.modoVistaAutonomia === m
+          ? 'px-2.5 py-1 rounded-lg font-bold text-[11px] bg-clio-500 text-white transition'
+          : 'px-2.5 py-1 rounded-lg font-semibold text-[11px] text-gray-600 dark:text-gray-400 transition';
       });
 
-      // Aguja del Medidor (-90deg es vacío, +90deg es lleno)
+      // Aguja y Arco
       const angle = -90 + (pct / 100) * 180;
       document.getElementById('gaugeNeedle').style.transform = `rotate(${angle}deg)`;
-
-      // Arco del Medidor (longitud total 251.3)
       const arc = document.getElementById('gaugeArc');
-      const offset = 251.3 - (pct / 100) * 251.3;
-      arc.style.strokeDashoffset = offset;
+      arc.style.strokeDashoffset = 251.3 - (pct / 100) * 251.3;
 
-      // Estado / Colores según reserva
       const badge = document.getElementById('badgeEstado');
       if (pct <= 15) {
         badge.className = 'text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-red-500/20 text-red-700 dark:text-red-300 border border-red-500/30 animate-pulse';
@@ -647,7 +684,19 @@
         arc.style.stroke = '#5b826e';
       }
 
-      // KPIs y Header
+      // Estado del ciclo entre tanques llenos
+      const txtCiclo = document.getElementById('textoCicloActual');
+      if (state.cicloLleno && state.cicloLleno.odometroInicioLleno) {
+        const kmRecorridosCiclo = state.odometroActual
+          ? Math.max(0, Math.round(state.odometroActual - state.cicloLleno.odometroInicioLleno))
+          : 0;
+        const parciales = state.cicloLleno.litrosParcialesAcumulados || 0;
+        txtCiclo.innerText = `Llenado a los ${Number(state.cicloLleno.odometroInicioLleno).toLocaleString('es-AR')} km · Recorridos: ${kmRecorridosCiclo} km ${parciales > 0 ? `(+${parciales.toFixed(1)}L parciales)` : ''}`;
+      } else {
+        txtCiclo.innerText = 'Registrá un Tanque Lleno para iniciar medición exacta';
+      }
+
+      // KPIs
       const odoText = state.odometroActual ? `${Math.round(state.odometroActual).toLocaleString('es-AR')} km` : 'Sin cargar';
       document.getElementById('headerOdometro').innerText = odoText;
       document.getElementById('kpiOdometro').innerText = odoText;
@@ -662,7 +711,7 @@
         : '--- km';
       document.getElementById('kpiUltimaCargaTipo').innerText = state.ultimaCargaTipo || 'Registrar carga →';
 
-      // Inputs de la pestaña Consumos
+      // Inputs Consumos
       document.getElementById('inputConsumoCalle').value = state.consumos.calle;
       document.getElementById('inputConsumoMixto').value = state.consumos.mixto;
       document.getElementById('inputConsumoRuta').value = state.consumos.ruta;
@@ -683,7 +732,6 @@
       saveState();
     }
 
-    // ==================== NAVEGACIÓN ENTRE SECCIONES ====================
     function irASeccion(sec) {
       ['tablero', 'historial', 'consumos'].forEach(s => {
         document.getElementById(`view-${s}`).classList.add('hidden');
@@ -698,7 +746,7 @@
     // ==================== MODAL VIAJE (+) ====================
     function abrirModalViaje() {
       bufferViajeKm = '0';
-      estiloViajeSeleccionado = 'calle'; // Siempre calle por defecto como pediste
+      estiloViajeSeleccionado = 'calle';
       document.getElementById('inputNotaViaje').value = '';
       seleccionarEstiloViaje('calle');
       actualizarDisplayViaje();
@@ -713,11 +761,9 @@
       estiloViajeSeleccionado = estilo;
       ['calle', 'mixto', 'ruta'].forEach(e => {
         const chip = document.getElementById(`chipEstilo-${e}`);
-        if (e === estilo) {
-          chip.className = 'py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 bg-clio-500 text-white shadow-sm';
-        } else {
-          chip.className = 'py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 bg-white dark:bg-[#1f2622] text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-white/10';
-        }
+        chip.className = e === estilo
+          ? 'py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 bg-clio-500 text-white shadow-sm'
+          : 'py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 bg-white dark:bg-[#1f2622] text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-white/10';
       });
       actualizarDisplayViaje();
     }
@@ -760,6 +806,12 @@
         state.odometroActual = Number(state.odometroActual) + km;
       }
 
+      // Acumular km por estilo en el ciclo actual para verificar si hubo un mismo tipo de uso
+      if (state.cicloLleno && state.cicloLleno.kmPorEstilo) {
+        state.cicloLleno.kmPorEstilo[estiloViajeSeleccionado] =
+          (state.cicloLleno.kmPorEstilo[estiloViajeSeleccionado] || 0) + km;
+      }
+
       state.historial.unshift({
         id: Date.now(),
         tipo: 'viaje',
@@ -775,11 +827,15 @@
       cerrarModalViaje();
     }
 
-    // ==================== MODAL CARGA DE COMBUSTIBLE ====================
+    // ==================== MODAL CARGA Y CÁLCULO DE CONSUMO REAL ====================
     function abrirModalCarga() {
-      setTipoCarga('lleno');
-      document.getElementById('inputLitrosCarga').value = '';
+      document.getElementById('checkPrimerLleno').checked = false;
+      document.getElementById('inputLitrosCarga').disabled = false;
+      const faltanteEstimado = Math.max(0, state.capacidadTanque - state.litrosActuales);
+      document.getElementById('inputLitrosCarga').value = faltanteEstimado > 0.5 ? faltanteEstimado.toFixed(1) : '';
+      document.getElementById('sugerenciaLitros').innerText = faltanteEstimado > 0 ? `Estimado: ~${faltanteEstimado.toFixed(1)}L` : '';
       document.getElementById('inputOdometroCarga').value = state.odometroActual ? Math.round(state.odometroActual) : '';
+      setTipoCarga('lleno');
       document.getElementById('modalCarga').classList.remove('hidden');
     }
 
@@ -787,67 +843,197 @@
       document.getElementById('modalCarga').classList.add('hidden');
     }
 
+    function togglePrimerLleno() {
+      const chk = document.getElementById('checkPrimerLleno').checked;
+      const inp = document.getElementById('inputLitrosCarga');
+      inp.disabled = chk;
+      if (chk) inp.value = '';
+    }
+
     function setTipoCarga(tipo) {
       tipoCargaSeleccionado = tipo;
       const tabLleno = document.getElementById('tabCarga-lleno');
       const tabParcial = document.getElementById('tabCarga-parcial');
-      const bloqueParcial = document.getElementById('bloqueCargaParcial');
+      const bloqueUso = document.getElementById('bloqueUsoTanque');
+      const chkWrapper = document.getElementById('checkPrimerLlenoWrapper');
+      const labelLitros = document.getElementById('labelLitrosSurtidor');
 
       if (tipo === 'lleno') {
         tabLleno.className = 'py-2.5 rounded-xl font-bold text-xs bg-clio-500 text-white shadow';
         tabParcial.className = 'py-2.5 rounded-xl font-bold text-xs text-gray-600 dark:text-gray-400';
-        bloqueParcial.classList.add('hidden');
+        bloqueUso.classList.remove('hidden');
+        chkWrapper.classList.remove('hidden');
+        labelLitros.innerText = '¿Cuántos litros entraron hasta llenar?';
+
+        // Mostrar resumen del ciclo previo si existe
+        const preview = document.getElementById('previewCicloInfo');
+        if (state.cicloLleno && state.cicloLleno.odometroInicioLleno) {
+          const parc = state.cicloLleno.litrosParcialesAcumulados || 0;
+          preview.innerText = `Último lleno a los ${state.cicloLleno.odometroInicioLleno} km. Cargas parciales en el medio: ${parc.toFixed(1)} L.`;
+        } else {
+          preview.innerText = 'Este llenado fijará el punto de partida (0 km) para el próximo cálculo.';
+        }
       } else {
         tabParcial.className = 'py-2.5 rounded-xl font-bold text-xs bg-clio-500 text-white shadow';
         tabLleno.className = 'py-2.5 rounded-xl font-bold text-xs text-gray-600 dark:text-gray-400';
-        bloqueParcial.classList.remove('hidden');
+        bloqueUso.classList.add('hidden');
+        chkWrapper.classList.add('hidden');
+        document.getElementById('inputLitrosCarga').disabled = false;
+        labelLitros.innerText = '¿Cuántos litros parciales cargaste?';
       }
+    }
+
+    // Detecta si hubo un mismo tipo de uso predominante (>= 85% de los km cargados)
+    function detectarEstiloUnico() {
+      const modoManual = document.getElementById('selectUsoCiclo').value;
+      if (modoManual !== 'auto') return modoManual;
+
+      const k = state.cicloLleno?.kmPorEstilo || { calle: 0, mixto: 0, ruta: 0 };
+      const total = k.calle + k.mixto + k.ruta;
+      if (total <= 0) return 'calle'; // Por defecto calle si no cargó viajes intermedios
+
+      if (k.calle / total >= 0.85) return 'calle';
+      if (k.mixto / total >= 0.85) return 'mixto';
+      if (k.ruta / total >= 0.85) return 'ruta';
+      return 'combinado';
     }
 
     function confirmarCargaCombustible() {
       const odoInput = parseFloat(document.getElementById('inputOdometroCarga').value);
       if (isNaN(odoInput) || odoInput <= 0) {
-        alert('Por favor ingresá los kilómetros que marca el tablero para dejar constancia.');
+        alert('Ingresá los kilómetros que marca el tablero.');
         return;
       }
 
-      let litrosSumados = 0;
-      if (tipoCargaSeleccionado === 'lleno') {
-        litrosSumados = state.capacidadTanque - state.litrosActuales;
-        state.litrosActuales = state.capacidadTanque;
-        state.ultimaCargaTipo = 'Tanque Lleno (50L)';
-      } else {
-        const l = parseFloat(document.getElementById('inputLitrosCarga').value);
-        if (isNaN(l) || l <= 0) {
-          alert('Ingresá cuántos litros cargaste.');
+      const esPrimerLleno = document.getElementById('checkPrimerLleno').checked;
+      const litrosInput = parseFloat(document.getElementById('inputLitrosCarga').value);
+
+      if (tipoCargaSeleccionado === 'parcial') {
+        if (isNaN(litrosInput) || litrosInput <= 0) {
+          alert('Ingresá cuántos litros parciales cargaste.');
           return;
         }
-        litrosSumados = l;
-        state.litrosActuales = Math.min(state.capacidadTanque, state.litrosActuales + l);
-        state.ultimaCargaTipo = `Parcial (+${l.toFixed(1)}L)`;
+        // Sumamos al tanque y acumulamos en el ciclo entre tanques llenos
+        state.litrosActuales = Math.min(state.capacidadTanque, state.litrosActuales + litrosInput);
+        state.cicloLleno.litrosParcialesAcumulados = (state.cicloLleno.litrosParcialesAcumulados || 0) + litrosInput;
+        state.ultimaCargaTipo = `Parcial (+${litrosInput.toFixed(1)}L)`;
+        state.kmParcialDesdeCarga = 0;
+        state.odometroActual = odoInput;
+        state.ultimaCargaOdometro = odoInput;
+
+        state.historial.unshift({
+          id: Date.now(),
+          tipo: 'carga',
+          subtipo: 'parcial',
+          litros: litrosInput,
+          odometro: odoInput,
+          nota: `Carga Parcial (+${litrosInput.toFixed(1)}L) · Acumulado ciclo: ${state.cicloLleno.litrosParcialesAcumulados.toFixed(1)}L`,
+          fecha: new Date().toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+        });
+
+        saveState();
+        cerrarModalCarga();
+        return;
       }
 
-      const parcialAnterior = state.kmParcialDesdeCarga;
+      // --- CASO TANQUE LLENO ---
+      if (!esPrimerLleno && (isNaN(litrosInput) || litrosInput <= 0)) {
+        alert('Ingresá cuántos litros entraron en el surtidor (o marcá la casilla de primer llenado).');
+        return;
+      }
+
+      const odoInicio = state.cicloLleno?.odometroInicioLleno;
+      const litrosParciales = state.cicloLleno?.litrosParcialesAcumulados || 0;
+      let verificacionCalculada = null;
+
+      // Si teníamos un tanque lleno previo válido y conocemos los litros que entraron ahora:
+      if (!esPrimerLleno && odoInicio && odoInput > odoInicio) {
+        const kmTotalesCiclo = odoInput - odoInicio;
+        const litrosTotalesConsumidos = litrosParciales + litrosInput;
+        const consumoReal = (litrosTotalesConsumidos / kmTotalesCiclo) * 100;
+        const estiloDominante = detectarEstiloUnico();
+
+        verificacionCalculada = {
+          kmTotalesCiclo,
+          litrosParciales,
+          litrosUltimoLlenado: litrosInput,
+          litrosTotalesConsumidos,
+          consumoReal: Number(consumoReal.toFixed(2)),
+          estiloDominante
+        };
+      }
+
+      // Reiniciar tanque a 50L y abrir nuevo ciclo limpio desde este odómetro
+      state.litrosActuales = state.capacidadTanque;
       state.kmParcialDesdeCarga = 0;
       state.odometroActual = odoInput;
       state.ultimaCargaOdometro = odoInput;
+      state.ultimaCargaTipo = esPrimerLleno ? 'Tanque Lleno (Inicio)' : `Lleno (+${litrosInput.toFixed(1)}L)`;
+
+      state.cicloLleno = {
+        activo: true,
+        odometroInicioLleno: odoInput,
+        litrosParcialesAcumulados: 0.0,
+        kmPorEstilo: { calle: 0, mixto: 0, ruta: 0 }
+      };
 
       state.historial.unshift({
         id: Date.now(),
         tipo: 'carga',
-        subtipo: tipoCargaSeleccionado,
-        litros: litrosSumados,
-        kmParcialPrevio: parcialAnterior,
+        subtipo: 'lleno',
+        litros: esPrimerLleno ? 0 : litrosInput,
         odometro: odoInput,
-        nota: tipoCargaSeleccionado === 'lleno' ? 'Tanque Lleno' : `Carga Parcial (+${litrosSumados.toFixed(1)}L)`,
+        verificacion: verificacionCalculada,
+        nota: verificacionCalculada
+          ? `Tanque Lleno (+${litrosInput.toFixed(1)}L) · Medido: ${verificacionCalculada.consumoReal} L/100`
+          : `Tanque Lleno (Base de ciclo fijada)`,
         fecha: new Date().toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
       });
 
       saveState();
       cerrarModalCarga();
+
+      // Si se pudo calcular el consumo real entre llenos, mostrar modal con el desglose
+      if (verificacionCalculada) {
+        mostrarResultadoVerificacion(verificacionCalculada);
+      }
     }
 
-    // ==================== ODÓMETRO INICIAL / CALIBRACIÓN ====================
+    function mostrarResultadoVerificacion(v) {
+      const kmL = (100 / v.consumoReal).toFixed(1);
+      document.getElementById('resumenMatematicoCiclo').innerText =
+        `Recorriste ${v.kmTotalesCiclo} km con ${v.litrosTotalesConsumidos.toFixed(1)} L totales (${v.litrosParciales > 0 ? `${v.litrosParciales.toFixed(1)}L parciales + ` : ''}${v.litrosUltimoLlenado.toFixed(1)}L de hoy).`;
+      document.getElementById('valorConsumoReal').innerText = `${v.consumoReal.toFixed(1)} L/100km`;
+      document.getElementById('valorRendimientoReal').innerText = `${kmL} km por litro`;
+
+      const bloqueAct = document.getElementById('bloqueActualizacionPromedio');
+      const txtComp = document.getElementById('textoComparacionPromedio');
+      const btnAplicar = document.getElementById('btnAplicarNuevoConsumo');
+
+      if (v.estiloDominante === 'combinado') {
+        txtComp.innerText = 'Como este tanque combinó distintos estilos de manejo (Calle y Ruta mezclados), te mostramos el promedio real pero no modificamos tus valores puros.';
+        btnAplicar.classList.add('hidden');
+      } else {
+        const nombreEstilo = v.estiloDominante.charAt(0).toUpperCase() + v.estiloDominante.slice(1);
+        const actualConfig = state.consumos[v.estiloDominante];
+        txtComp.innerText = `Uso del tanque: ${nombreEstilo}. Tenías configurado ${actualConfig} L/100km y el auto gastó exactamente ${v.consumoReal.toFixed(1)} L/100km.`;
+        btnAplicar.classList.remove('hidden');
+        btnAplicar.innerText = `Actualizar consumo ${nombreEstilo} a ${v.consumoReal.toFixed(1)} L/100`;
+        btnAplicar.onclick = () => {
+          state.consumos[v.estiloDominante] = Number(v.consumoReal.toFixed(1));
+          saveState();
+          cerrarModalResultadoConsumo();
+        };
+      }
+
+      document.getElementById('modalResultadoConsumo').classList.remove('hidden');
+    }
+
+    function cerrarModalResultadoConsumo() {
+      document.getElementById('modalResultadoConsumo').classList.add('hidden');
+    }
+
+    // ==================== ODÓMETRO INICIAL ====================
     function abrirModalOdometro() {
       document.getElementById('inputOdometroInicial').value = state.odometroActual ? Math.round(state.odometroActual) : '';
       document.getElementById('modalOdometroInicial').classList.remove('hidden');
@@ -861,11 +1047,12 @@
       }
       state.odometroActual = val;
       if (!state.ultimaCargaOdometro) state.ultimaCargaOdometro = val;
+      if (!state.cicloLleno.odometroInicioLleno) state.cicloLleno.odometroInicioLleno = val;
       document.getElementById('modalOdometroInicial').classList.add('hidden');
       saveState();
     }
 
-    // ==================== HISTORIAL Y BORRADO ====================
+    // ==================== HISTORIAL ====================
     function renderHistorial() {
       const recientesContainer = document.getElementById('listaRecientes');
       const completoContainer = document.getElementById('listaHistorialCompleto');
@@ -920,8 +1107,8 @@
                 </div>
               </div>
               <div class="text-right">
-                <div class="text-xs font-extrabold text-emerald-600 dark:text-emerald-400">+${item.litros.toFixed(1)} L</div>
-                <div class="text-[10px] text-gray-400">Parcial ant: ${item.kmParcialPrevio?.toFixed(0) || 0} km</div>
+                <div class="text-xs font-extrabold text-emerald-600 dark:text-emerald-400">${item.litros > 0 ? `+${item.litros.toFixed(1)} L` : '50.0 L'}</div>
+                <div class="text-[10px] text-gray-400">${item.subtipo === 'lleno' ? 'Corte lleno' : 'Parcial'}</div>
               </div>
             </div>
           `;
@@ -936,18 +1123,21 @@
       const idx = state.historial.findIndex(x => x.id === id);
       if (idx === -1) return;
       const item = state.historial[idx];
-      if (!confirm('¿Deshacer este registro y devolver los kilómetros/litros al tanque?')) return;
+      if (!confirm('¿Deshacer este recorrido y devolver los litros al tanque?')) return;
 
       if (item.tipo === 'viaje') {
         state.litrosActuales = Math.min(state.capacidadTanque, state.litrosActuales + item.litros);
         state.kmParcialDesdeCarga = Math.max(0, state.kmParcialDesdeCarga - item.km);
         if (state.odometroActual) state.odometroActual -= item.km;
+        if (state.cicloLleno?.kmPorEstilo && state.cicloLleno.kmPorEstilo[item.estilo]) {
+          state.cicloLleno.kmPorEstilo[item.estilo] = Math.max(0, state.cicloLleno.kmPorEstilo[item.estilo] - item.km);
+        }
       }
       state.historial.splice(idx, 1);
       saveState();
     }
 
-    // ==================== GUARDAR CONSUMOS ====================
+    // ==================== GUARDAR CONSUMOS MANUALES ====================
     function guardarConfigConsumos() {
       const cCalle = parseFloat(document.getElementById('inputConsumoCalle').value);
       const cMixto = parseFloat(document.getElementById('inputConsumoMixto').value);
@@ -966,14 +1156,14 @@
     function resetearAppCompleta() {
       if (confirm('¿Seguro que querés reiniciar todos los datos de la app?')) {
         localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem('miclio_v2_data');
         location.reload();
       }
     }
 
-    // ==================== INICIO Y SERVICE WORKER ====================
+    // ==================== INICIO ====================
     window.addEventListener('DOMContentLoaded', () => {
       renderAll();
-      // Si no tiene cargado el odómetro del tablero, se lo pide apenas entra
       if (!state.odometroActual) {
         document.getElementById('modalOdometroInicial').classList.remove('hidden');
       }

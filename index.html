@@ -1,19 +1,19 @@
 <!DOCTYPE html>
-<html lang="es" class="h-full">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>MiClio Nafta</title>
+  
+  <!-- Manifest y PWA Config -->
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#1b2920">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="theme-color" content="#5b7c6b">
-  <title>MiClio • Medidor Virtual</title>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="MiClio">
 
-  <!-- PWA Manifest inline -->
-  <link rel="manifest" href="data:application/manifest+json;utf-8,%7B%22name%22%3A%22MiClio%20Nafta%22%2C%22short_name%22%3A%22MiClio%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f5f8f6%22%2C%22theme_color%22%3A%22%235b7c6b%22%7D">
-
-  <!-- Tailwind CSS -->
+  <!-- Tailwind CSS & FontAwesome -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Phosphor Icons & FontAwesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <script>
@@ -25,29 +25,13 @@
             clio: {
               50: '#f4f7f5',
               100: '#e5ece7',
-              200: '#cbdad1',
-              300: '#a6bfb1',
-              400: '#7d9e8c',
-              500: '#5b7c6b', /* Sage / Olive Green del Clio de la foto */
-              600: '#476355',
-              700: '#394f44',
-              800: '#2f4037',
-              900: '#1d2722',
-              950: '#0f1512'
-            },
-            appBg: '#f6f8f6',
-            appCard: '#ffffff',
-            appText: '#18241d',
-            appSub: '#6b7c72'
-          },
-          fontFamily: {
-            sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"Segoe UI"', 'Roboto', 'Inter', 'sans-serif'],
-            mono: ['"SF Mono"', 'ui-monospace', 'Menlo', 'monospace']
-          },
-          boxShadow: {
-            'soft': '0 4px 20px -2px rgba(91, 124, 107, 0.08)',
-            'card': '0 1px 3px rgba(0,0,0,0.02), 0 8px 24px rgba(25, 40, 32, 0.04)',
-            'float': '0 12px 30px -4px rgba(91, 124, 107, 0.35)'
+              200: '#cad9ce',
+              500: '#5b7c6b',
+              600: '#466455',
+              700: '#344c40',
+              800: '#23342b',
+              900: '#1b2920',
+            }
           }
         }
       }
@@ -55,991 +39,233 @@
   </script>
 
   <style>
-    /* Suavizado iOS y móvil */
-    * {
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
-    }
-    input, textarea {
-      user-select: text;
-    }
     body {
-      touch-action: pan-x pan-y;
-    }
-    .safe-top {
-      padding-top: env(safe-area-inset-top, 12px);
+      -webkit-tap-highlight-color: transparent;
+      padding-bottom: calc(85px + env(safe-area-inset-bottom, 0px));
     }
     .safe-bottom {
-      padding-bottom: env(safe-area-inset-bottom, 20px);
-    }
-    /* Barra de progreso de nivel de tanque estilo fintech */
-    .pill-segment {
-      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .modal-enter {
-      animation: slideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-    @keyframes slideUp {
-      from { transform: translateY(100%); opacity: 0.6; }
-      to { transform: translateY(0); opacity: 1; }
+      padding-bottom: env(safe-area-inset-bottom, 12px);
     }
   </style>
 </head>
-<body class="bg-slate-100 text-appText font-sans antialiased h-full flex justify-center selection:bg-clio-200">
+<body class="bg-gray-100 text-gray-900 font-sans antialiased min-h-screen">
 
-  <!-- FRAME CONTENEDOR MÓVIL ESTILO APP NATIVA -->
-  <div class="w-full max-w-md bg-appBg h-full min-h-screen flex flex-col justify-between shadow-2xl relative overflow-hidden transition-colors duration-300 dark:bg-clio-950 dark:text-slate-100">
-
-    <!-- TOP BAR (Identica a "MiPlata" con logo de rombo Renault) -->
-    <header class="safe-top px-5 pt-3 pb-2.5 flex items-center justify-between border-b border-clio-100/60 dark:border-clio-900 bg-appBg/95 dark:bg-clio-950/90 backdrop-blur sticky top-0 z-30">
-      <div class="flex items-center gap-2.5">
-        <!-- Logo Rombo Renault en Verde Sage Clio -->
-        <div class="w-8 h-8 rounded-xl bg-clio-500 text-white flex items-center justify-center shadow-sm">
-          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
-            <path d="M12 2L4 12L12 22L20 12L12 2ZM12 6.5L16.2 12L12 17.5L7.8 12L12 6.5Z"/>
-          </svg>
-        </div>
-        <div>
-          <h1 class="text-base font-bold tracking-tight text-clio-900 dark:text-white flex items-center gap-1.5 leading-none">
-            MiClio
-            <span class="text-[10px] font-semibold text-clio-700 bg-clio-100 dark:bg-clio-900 dark:text-clio-300 px-1.5 py-0.5 rounded-md">1.2 / 1.6</span>
-          </h1>
-          <p class="text-[11px] text-clio-sub dark:text-clio-300/70 mt-0.5">Control de Nafta & Odómetro</p>
-        </div>
+  <!-- Header Superior -->
+  <header class="bg-white border-b border-gray-200 sticky top-0 z-40 px-4 py-3 flex items-center justify-between shadow-sm">
+    <div class="flex items-center space-x-2">
+      <div class="w-8 h-8 rounded-lg bg-clio-900 flex items-center justify-center text-clio-200 shadow-sm">
+        <i class="fa-solid fa-gem text-xs"></i>
       </div>
-
-      <div class="flex items-center gap-1.5">
-        <!-- Selector Rápiido de Calibración / Modo Oscuro -->
-        <button onclick="toggleDarkMode()" class="w-9 h-9 rounded-full bg-white dark:bg-clio-900 border border-clio-100 dark:border-clio-800 text-clio-700 dark:text-clio-200 flex items-center justify-center text-sm shadow-sm active:scale-95 transition">
-          <i id="theme-icon" class="fa-regular fa-moon"></i>
-        </button>
-        <button onclick="openModal('modal-config')" class="w-9 h-9 rounded-full bg-white dark:bg-clio-900 border border-clio-100 dark:border-clio-800 text-clio-700 dark:text-clio-200 flex items-center justify-center text-sm shadow-sm active:scale-95 transition">
-          <i class="fa-solid fa-sliders"></i>
-        </button>
+      <div>
+        <h1 class="text-base font-bold text-gray-900 leading-tight">MiClio <span class="text-xs font-semibold px-1.5 py-0.5 rounded bg-clio-100 text-clio-700">1.6 16v</span></h1>
+        <p class="text-[11px] text-gray-500">Tanque actual en curso</p>
       </div>
-    </header>
-
-    <!-- CUERPO PRINCIPAL CON SCROLL SUAVE -->
-    <main id="main-scroll" class="flex-1 overflow-y-auto px-4 py-3 space-y-4 pb-28">
-
-      <!-- PÍLDORA SELECTORA DE PERÍODO / TANQUE ACTUAL -->
-      <div class="flex items-center justify-between px-1">
-        <button onclick="cycleTankMode()" class="flex items-center gap-2 text-xs font-semibold text-clio-700 dark:text-clio-300 bg-white dark:bg-clio-900 border border-clio-200/80 dark:border-clio-800 px-3 py-1.5 rounded-full shadow-sm">
-          <i class="fa-solid fa-gas-pump text-[11px] text-clio-500"></i>
-          <span id="period-display">Tanque actual en curso</span>
-          <i class="fa-solid fa-chevron-down text-[9px] text-clio-400"></i>
-        </button>
-        <span class="text-[11px] font-medium text-clio-sub dark:text-clio-400" id="last-updated-text">Actualizado recién</span>
-      </div>
-
-      <!-- CARD HERO PRINCIPAL (Estilo "RESULTADO DEL MES" de MiPlata) -->
-      <div class="bg-appCard dark:bg-clio-900 rounded-[24px] p-5 shadow-card border border-clio-100 dark:border-clio-800/80 relative overflow-hidden">
-        
-        <!-- Badge superior de Estado de Reserva -->
-        <div class="flex justify-between items-start mb-2">
-          <span class="text-xs font-semibold tracking-wider uppercase text-clio-sub dark:text-clio-300/80">Autonomía Estimada</span>
-          <div id="tank-badge" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-clio-50 dark:bg-clio-800/60 text-clio-700 dark:text-clio-200 border border-clio-200 dark:border-clio-700">
-            <span class="w-2 h-2 rounded-full bg-clio-500"></span>
-            <span id="tank-badge-text">Nivel Óptimo</span>
-          </div>
-        </div>
-
-        <!-- Número Gigante de Autonomía -->
-        <div class="flex items-baseline gap-1.5 mt-1">
-          <span id="hero-km" class="text-4xl font-extrabold tracking-tight text-clio-900 dark:text-white leading-none">385</span>
-          <span class="text-xl font-bold text-clio-500">km</span>
-          <span id="hero-subliters" class="ml-2 text-xs font-semibold text-clio-sub dark:text-clio-300">≈ 38.5 L de 50 L</span>
-        </div>
-
-        <!-- Indicador Gráfico de Combustible (Barra FinTech Segmentada + Ticks) -->
-        <div class="mt-4 pt-1">
-          <div class="flex justify-between items-center text-[10px] font-bold text-clio-sub dark:text-clio-400 uppercase tracking-wider mb-1.5">
-            <span class="text-rose-500 font-extrabold">R (Vacío)</span>
-            <span>1/4</span>
-            <span>1/2</span>
-            <span>3/4</span>
-            <span class="text-clio-600 dark:text-clio-300 font-extrabold">Lleno</span>
-          </div>
-
-          <!-- Píldoras del medidor -->
-          <div class="w-full h-3.5 bg-clio-100 dark:bg-clio-800 rounded-full p-0.5 flex gap-1 relative overflow-hidden shadow-inner">
-            <div id="gauge-bar" class="h-full bg-gradient-to-r from-clio-400 to-clio-500 dark:from-clio-500 dark:to-clio-400 rounded-full transition-all duration-700 ease-out" style="width: 77%;"></div>
-          </div>
-
-          <div class="flex justify-between items-center mt-2 text-xs">
-            <span class="text-clio-sub dark:text-clio-300 text-[11px]">Porcentaje restante</span>
-            <span id="hero-percent" class="font-extrabold text-clio-900 dark:text-white">77%</span>
-          </div>
-        </div>
-
-        <!-- BOTÓN RÁPIDO DE 1-TOQUE: "¡Llené el Tanque!" -->
-        <div class="mt-4 pt-3 border-t border-clio-50 dark:border-clio-800 flex gap-2">
-          <button onclick="quickFullTankPrompt()" class="w-full py-2.5 px-3 rounded-xl bg-clio-50 dark:bg-clio-800/80 hover:bg-clio-100 text-clio-700 dark:text-clio-200 border border-clio-200 dark:border-clio-700 text-xs font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition">
-            <i class="fa-solid fa-arrows-rotate text-clio-500"></i>
-            <span>Llené el tanque (Reset a 500 km)</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- GRID DE CARDS KPI 2x2 (Diseño exacto de MiPlata: Ingresos, Gastos, Deudas, etc.) -->
-      <div class="grid grid-cols-2 gap-3">
-        
-        <!-- Card 1: Km Recorridos desde lleno -->
-        <div class="bg-appCard dark:bg-clio-900 rounded-[20px] p-3.5 shadow-card border border-clio-100/80 dark:border-clio-800/60">
-          <div class="flex items-center gap-2 mb-1.5">
-            <div class="w-6 h-6 rounded-lg bg-clio-100 dark:bg-clio-800 text-clio-600 dark:text-clio-300 flex items-center justify-center text-xs">
-              <i class="fa-solid fa-route"></i>
-            </div>
-            <span class="text-[11px] font-semibold text-clio-sub dark:text-clio-300">Rodados</span>
-          </div>
-          <div class="text-lg font-bold text-clio-900 dark:text-white">
-            <span id="kpi-km-done">115</span> <span class="text-xs font-normal text-clio-sub">km</span>
-          </div>
-          <div class="text-[10px] text-clio-sub mt-0.5 flex items-center gap-1">
-            <i class="fa-solid fa-clock-rotate-left text-[9px] text-clio-400"></i> Desde último lleno
-          </div>
-        </div>
-
-        <!-- Card 2: Litros Disponibles -->
-        <div class="bg-appCard dark:bg-clio-900 rounded-[20px] p-3.5 shadow-card border border-clio-100/80 dark:border-clio-800/60">
-          <div class="flex items-center gap-2 mb-1.5">
-            <div class="w-6 h-6 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 flex items-center justify-center text-xs">
-              <i class="fa-solid fa-gas-pump"></i>
-            </div>
-            <span class="text-[11px] font-semibold text-clio-sub dark:text-clio-300">Litros Disp.</span>
-          </div>
-          <div class="text-lg font-bold text-clio-900 dark:text-white">
-            <span id="kpi-liters-left">38.5</span> <span class="text-xs font-normal text-clio-sub">L</span>
-          </div>
-          <div class="text-[10px] text-clio-sub mt-0.5">
-            Capacidad: 50 Litros
-          </div>
-        </div>
-
-        <!-- Card 3: Rendimiento Medio -->
-        <div class="bg-appCard dark:bg-clio-900 rounded-[20px] p-3.5 shadow-card border border-clio-100/80 dark:border-clio-800/60">
-          <div class="flex items-center gap-2 mb-1.5">
-            <div class="w-6 h-6 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 flex items-center justify-center text-xs">
-              <i class="fa-solid fa-gauge-high"></i>
-            </div>
-            <span class="text-[11px] font-semibold text-clio-sub dark:text-clio-300">Rendimiento</span>
-          </div>
-          <div class="text-lg font-bold text-clio-900 dark:text-white">
-            <span id="kpi-rend">10.0</span> <span class="text-xs font-normal text-clio-sub">km/L</span>
-          </div>
-          <div class="text-[10px] text-clio-sub mt-0.5">
-            ≈ 10 L/100km
-          </div>
-        </div>
-
-        <!-- Card 4: Dinero en Tanque -->
-        <div class="bg-appCard dark:bg-clio-900 rounded-[20px] p-3.5 shadow-card border border-clio-100/80 dark:border-clio-800/60">
-          <div class="flex items-center gap-2 mb-1.5">
-            <div class="w-6 h-6 rounded-lg bg-clio-100 dark:bg-clio-800 text-clio-600 dark:text-clio-300 flex items-center justify-center text-xs">
-              <i class="fa-solid fa-wallet"></i>
-            </div>
-            <span class="text-[11px] font-semibold text-clio-sub dark:text-clio-300">Valor Tanque</span>
-          </div>
-          <div class="text-lg font-bold text-clio-900 dark:text-white">
-            $<span id="kpi-money-left">42.350</span>
-          </div>
-          <div class="text-[10px] text-clio-sub mt-0.5">
-            A $1.100 / Litro
-          </div>
-        </div>
-
-      </div>
-
-      <!-- BOTONES DE ENTRADA RÁPIDA (Estilo Fijos / Tarjetas de MiPlata) -->
-      <div class="bg-white dark:bg-clio-900 rounded-[22px] p-3.5 shadow-card border border-clio-100/80 dark:border-clio-800/60">
-        <span class="text-[11px] font-bold uppercase tracking-wider text-clio-sub dark:text-clio-400 block mb-2 px-1">
-          Descuento Rápido de Trayecto
-        </span>
-        <div class="grid grid-cols-4 gap-2">
-          <button onclick="quickAddTrip(5, 'Mandado / Corto')" class="py-2.5 px-2 bg-clio-50 dark:bg-clio-800/60 hover:bg-clio-100 dark:hover:bg-clio-800 rounded-xl text-center active:scale-95 transition border border-clio-100 dark:border-clio-700">
-            <span class="block text-xs font-extrabold text-clio-900 dark:text-white">- 5 km</span>
-            <span class="text-[9px] text-clio-sub dark:text-clio-400">Corto</span>
-          </button>
-          <button onclick="quickAddTrip(10, 'Ida habitual')" class="py-2.5 px-2 bg-clio-50 dark:bg-clio-800/60 hover:bg-clio-100 dark:hover:bg-clio-800 rounded-xl text-center active:scale-95 transition border border-clio-100 dark:border-clio-700">
-            <span class="block text-xs font-extrabold text-clio-900 dark:text-white">- 10 km</span>
-            <span class="text-[9px] text-clio-sub dark:text-clio-400">Habitual</span>
-          </button>
-          <button onclick="quickAddTrip(25, 'Ida y Vuelta Trabajo')" class="py-2.5 px-2 bg-clio-50 dark:bg-clio-800/60 hover:bg-clio-100 dark:hover:bg-clio-800 rounded-xl text-center active:scale-95 transition border border-clio-100 dark:border-clio-700">
-            <span class="block text-xs font-extrabold text-clio-900 dark:text-white">- 25 km</span>
-            <span class="text-[9px] text-clio-sub dark:text-clio-400">Trabajo</span>
-          </button>
-          <button onclick="quickAddTrip(50, 'Salida autopista')" class="py-2.5 px-2 bg-clio-50 dark:bg-clio-800/60 hover:bg-clio-100 dark:hover:bg-clio-800 rounded-xl text-center active:scale-95 transition border border-clio-100 dark:border-clio-700">
-            <span class="block text-xs font-extrabold text-clio-900 dark:text-white">- 50 km</span>
-            <span class="text-[9px] text-clio-sub dark:text-clio-400">Viaje</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- SECCIÓN "ÚLTIMOS MOVIMIENTOS" (Idéntica visualmente a la app de gastos) -->
-      <div class="space-y-2 pt-1">
-        <div class="flex items-center justify-between px-1">
-          <h2 class="text-sm font-bold text-clio-900 dark:text-white">Últimos movimientos</h2>
-          <button onclick="openHistoryFullModal()" class="text-xs font-semibold text-clio-500 hover:text-clio-600">Ver todos</button>
-        </div>
-
-        <div id="recent-list" class="space-y-2">
-          <!-- Renderizado dinámico de cards -->
-        </div>
-
-        <div id="empty-state" class="hidden text-center py-8 bg-white dark:bg-clio-900 rounded-2xl border border-dashed border-clio-200 dark:border-clio-800">
-          <i class="fa-solid fa-car text-2xl text-clio-300 mb-2"></i>
-          <p class="text-xs font-medium text-clio-sub">No hay registros aún en este tanque.</p>
-        </div>
-      </div>
-
-    </main>
-
-    <!-- FLOATING ACTION BUTTON (+) DE ALTA RÁPIDA (Estilo exacto de MiPlata en naranja/sage) -->
-    <div class="absolute right-5 bottom-20 z-30">
-      <button onclick="openTripModal()" class="w-14 h-14 rounded-full bg-clio-500 hover:bg-clio-600 text-white shadow-float flex items-center justify-center text-2xl active:scale-90 transition-transform">
-        <i class="fa-solid fa-plus"></i>
-      </button>
     </div>
+    <button onclick="calibrarLleno()" class="text-xs font-semibold bg-clio-700 hover:bg-clio-800 text-white px-3 py-1.5 rounded-full shadow transition-all active:scale-95 flex items-center gap-1.5">
+      <i class="fa-solid fa-gas-pump"></i> ¡Llené Tanque!
+    </button>
+  </header>
 
-    <!-- BOTTOM TAB NAVIGATION (Idéntica a la barra de MiPlata: Resumen, Tarjetas, Fijos, Proyección) -->
-    <nav class="safe-bottom bg-white/95 dark:bg-clio-950/95 backdrop-blur border-t border-clio-100 dark:border-clio-900 px-4 py-2 flex items-center justify-around z-20">
-      
-      <!-- Tab 1: Resumen -->
-      <button onclick="switchTab('resumen')" id="nav-btn-resumen" class="flex flex-col items-center gap-1 text-clio-600 dark:text-clio-300 py-1 flex-1">
-        <div class="w-5 h-5 flex items-center justify-center">
-          <i class="fa-solid fa-house text-base"></i>
+  <!-- Contenedor Principal -->
+  <main class="max-w-md mx-auto p-4 space-y-4">
+
+    <!-- Card Principal / Autonomía -->
+    <div class="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
+      <div class="flex justify-between items-start">
+        <span class="text-xs font-semibold uppercase tracking-wider text-gray-400">Autonomía Estimada</span>
+        <span id="badgeNivel" class="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">Nivel Óptimo</span>
+      </div>
+
+      <div class="mt-2 flex items-baseline gap-2">
+        <span id="kmRestantes" class="text-5xl font-black text-gray-900 tracking-tight">520</span>
+        <span class="text-lg font-bold text-gray-500">km</span>
+      </div>
+      <p class="text-xs text-gray-500 mt-1">Aprox. <strong id="litrosRestantes" class="text-gray-700">50.0</strong> L en el tanque (Capacidad: 50L)</p>
+
+      <!-- Barra Segmentada -->
+      <div class="mt-4">
+        <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden p-0.5">
+          <div id="barraProgreso" class="bg-clio-600 h-full rounded-full transition-all duration-500" style="width: 100%;"></div>
         </div>
-        <span class="text-[10px] font-bold">Resumen</span>
-      </button>
-
-      <!-- Tab 2: Cargar Nafta -->
-      <button onclick="openRefuelModal()" class="flex flex-col items-center gap-1 text-clio-sub hover:text-clio-600 dark:text-clio-400 py-1 flex-1">
-        <div class="w-5 h-5 flex items-center justify-center">
-          <i class="fa-solid fa-gas-pump text-base"></i>
+        <div class="flex justify-between text-[10px] font-bold text-gray-400 mt-1.5 px-0.5">
+          <span class="text-red-500">Reserva</span>
+          <span>1/4</span>
+          <span>1/2</span>
+          <span>3/4</span>
+          <span class="text-clio-700">Lleno</span>
         </div>
-        <span class="text-[10px] font-medium">Cargas</span>
-      </button>
-
-      <!-- Tab 3: Registrar Km -->
-      <button onclick="openTripModal()" class="flex flex-col items-center gap-1 text-clio-sub hover:text-clio-600 dark:text-clio-400 py-1 flex-1">
-        <div class="w-5 h-5 flex items-center justify-center">
-          <i class="fa-solid fa-car-side text-base"></i>
-        </div>
-        <span class="text-[10px] font-medium">Viajes</span>
-      </button>
-
-      <!-- Tab 4: Configuración / Proyección -->
-      <button onclick="openModal('modal-config')" class="flex flex-col items-center gap-1 text-clio-sub hover:text-clio-600 dark:text-clio-400 py-1 flex-1">
-        <div class="w-5 h-5 flex items-center justify-center">
-          <i class="fa-solid fa-sliders text-base"></i>
-        </div>
-        <span class="text-[10px] font-medium">Ajustes</span>
-      </button>
-
-    </nav>
-
-    <!-- ============================================================ -->
-    <!-- MODAL 1: ALTA DE VIAJE CON TECLADO NUMÉRICO (3 TOQUES - MiPlata) -->
-    <!-- ============================================================ -->
-    <div id="modal-trip" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex flex-col justify-end hidden">
-      <div class="w-full max-w-md mx-auto bg-white dark:bg-clio-900 rounded-t-[32px] p-5 shadow-2xl modal-enter safe-bottom">
-        
-        <!-- Header del Modal -->
-        <div class="flex items-center justify-between pb-3">
-          <button onclick="closeModal('modal-trip')" class="text-clio-sub dark:text-clio-300 text-lg p-1">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-          <span class="text-sm font-bold text-clio-900 dark:text-white">Nuevo viaje / Km</span>
-          <button onclick="clearTripNumpad()" class="text-xs font-semibold text-rose-500 p-1">Borrar</button>
-        </div>
-
-        <!-- Display de Distancia (Número grande como en pantalla 2 de gastos) -->
-        <div class="text-center py-3 border-b border-clio-100 dark:border-clio-800">
-          <div class="flex items-baseline justify-center gap-1">
-            <span id="numpad-display" class="text-4xl font-extrabold text-clio-900 dark:text-white">0</span>
-            <span class="text-xl font-bold text-clio-500">km</span>
-          </div>
-          <span class="text-xs text-clio-sub" id="numpad-calc-preview">Descontará aprox. 0.0 Litros</span>
-        </div>
-
-        <!-- Selector de Tipo de Manejo (Ciudad / Mixto / Ruta) -->
-        <div class="flex gap-2 py-3">
-          <button type="button" onclick="setTripType('city')" id="type-city" class="flex-1 py-2 px-2 rounded-xl text-xs font-bold border border-clio-200 dark:border-clio-700 text-clio-sub">Ciudad (+15%)</button>
-          <button type="button" onclick="setTripType('mixed')" id="type-mixed" class="flex-1 py-2 px-2 rounded-xl text-xs font-bold bg-clio-500 text-white shadow-sm">Mixto (1x)</button>
-          <button type="button" onclick="setTripType('highway')" id="type-highway" class="flex-1 py-2 px-2 rounded-xl text-xs font-bold border border-clio-200 dark:border-clio-700 text-clio-sub">Ruta (-15%)</button>
-        </div>
-
-        <!-- Input de Nota Rápida -->
-        <div class="mb-3">
-          <input type="text" id="trip-desc" placeholder="Destino / Nota (Ej: Autopista del Oeste, Supermercado)" class="w-full bg-clio-50 dark:bg-clio-800 border border-clio-100 dark:border-clio-700 rounded-xl px-3.5 py-2.5 text-xs text-clio-900 dark:text-white focus:outline-none focus:border-clio-500">
-        </div>
-
-        <!-- Botón de Guardar Gasto/Viaje estilo MiPlata -->
-        <button onclick="submitTripFromNumpad()" class="w-full py-3.5 rounded-2xl bg-clio-500 hover:bg-clio-600 text-white font-bold text-sm shadow-md active:scale-[0.99] transition mb-3">
-          Guardar viaje
-        </button>
-
-        <!-- Teclado Numérico iOS (Pantalla 2 de MiPlata) -->
-        <div class="grid grid-cols-3 gap-2 text-xl font-semibold text-clio-900 dark:text-white">
-          <button onclick="pressNum(1)" class="py-3 bg-clio-50 dark:bg-clio-800 hover:bg-clio-100 rounded-xl">1</button>
-          <button onclick="pressNum(2)" class="py-3 bg-clio-50 dark:bg-clio-800 hover:bg-clio-100 rounded-xl">2</button>
-          <button onclick="pressNum(3)" class="py-3 bg-clio-50 dark:bg-clio-800 hover:bg-clio-100 rounded-xl">3</button>
-          
-          <button onclick="pressNum(4)" class="py-3 bg-clio-50 dark:bg-clio-800 hover:bg-clio-100 rounded-xl">4</button>
-          <button onclick="pressNum(5)" class="py-3 bg-clio-50 dark:bg-clio-800 hover:bg-clio-100 rounded-xl">5</button>
-          <button onclick="pressNum(6)" class="py-3 bg-clio-50 dark:bg-clio-800 hover:bg-clio-100 rounded-xl">6</button>
-          
-          <button onclick="pressNum(7)" class="py-3 bg-clio-50 dark:bg-clio-800 hover:bg-clio-100 rounded-xl">7</button>
-          <button onclick="pressNum(8)" class="py-3 bg-clio-50 dark:bg-clio-800 hover:bg-clio-100 rounded-xl">8</button>
-          <button onclick="pressNum(9)" class="py-3 bg-clio-50 dark:bg-clio-800 hover:bg-clio-100 rounded-xl">9</button>
-          
-          <button onclick="pressNum('.')" class="py-3 bg-clio-50 dark:bg-clio-800 hover:bg-clio-100 rounded-xl font-bold">.</button>
-          <button onclick="pressNum(0)" class="py-3 bg-clio-50 dark:bg-clio-800 hover:bg-clio-100 rounded-xl">0</button>
-          <button onclick="pressBackspace()" class="py-3 bg-clio-50 dark:bg-clio-800 hover:bg-clio-100 rounded-xl text-clio-sub">
-            <i class="fa-solid fa-delete-left text-lg"></i>
-          </button>
-        </div>
-
       </div>
     </div>
 
-    <!-- ============================================================ -->
-    <!-- MODAL 2: CARGA DE COMBUSTIBLE (PARCIAL, MONTO O FRACCIÓN)     -->
-    <!-- ============================================================ -->
-    <div id="modal-refuel" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex flex-col justify-end hidden">
-      <div class="w-full max-w-md mx-auto bg-white dark:bg-clio-900 rounded-t-[32px] p-5 shadow-2xl modal-enter safe-bottom">
-        
-        <div class="flex items-center justify-between pb-3">
-          <button onclick="closeModal('modal-refuel')" class="text-clio-sub dark:text-clio-300 text-lg p-1">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-          <span class="text-sm font-bold text-clio-900 dark:text-white">Cargar Nafta en el Clio</span>
-          <span class="w-6"></span>
-        </div>
-
-        <!-- Pestañas de modo de carga -->
-        <div class="flex bg-clio-50 dark:bg-clio-800 p-1 rounded-xl mb-4 text-xs font-semibold">
-          <button onclick="switchRefuelMode('liters')" id="rf-tab-liters" class="flex-1 py-1.5 rounded-lg bg-white dark:bg-clio-900 text-clio-700 dark:text-clio-200 shadow-sm">Por Litros</button>
-          <button onclick="switchRefuelMode('fraction')" id="rf-tab-fraction" class="flex-1 py-1.5 rounded-lg text-clio-sub">Por Tanque</button>
-          <button onclick="switchRefuelMode('money')" id="rf-tab-money" class="flex-1 py-1.5 rounded-lg text-clio-sub">Por Monto ($)</button>
-        </div>
-
-        <form id="form-refuel-action" onsubmit="submitRefuel(event)" class="space-y-3">
-          
-          <!-- Contenedor Por Litros -->
-          <div id="rf-view-liters">
-            <label class="block text-xs font-semibold text-clio-sub mb-1">Litros cargados</label>
-            <input type="number" step="0.1" id="rf-liters-input" placeholder="Ej: 15.0" class="w-full bg-clio-50 dark:bg-clio-800 border border-clio-200 dark:border-clio-700 rounded-xl px-4 py-3 text-2xl font-bold text-clio-900 dark:text-white focus:outline-none focus:border-clio-500">
-            
-            <div class="flex gap-2 mt-2">
-              <button type="button" onclick="setRefuelQuick(10)" class="text-xs bg-clio-100 dark:bg-clio-800 text-clio-700 dark:text-clio-300 font-semibold px-2.5 py-1.5 rounded-lg">+10 L</button>
-              <button type="button" onclick="setRefuelQuick(20)" class="text-xs bg-clio-100 dark:bg-clio-800 text-clio-700 dark:text-clio-300 font-semibold px-2.5 py-1.5 rounded-lg">+20 L</button>
-              <button type="button" onclick="setRefuelQuick(30)" class="text-xs bg-clio-100 dark:bg-clio-800 text-clio-700 dark:text-clio-300 font-semibold px-2.5 py-1.5 rounded-lg">+30 L</button>
-            </div>
-          </div>
-
-          <!-- Contenedor Por Fracción -->
-          <div id="rf-view-fraction" class="hidden space-y-2">
-            <label class="block text-xs font-semibold text-clio-sub mb-1">Fracción del tanque cargada</label>
-            <div class="grid grid-cols-3 gap-2">
-              <button type="button" onclick="setFraction(0.25)" class="frac-card p-3 rounded-xl border border-clio-200 dark:border-clio-700 text-center active:bg-clio-100">
-                <span class="block text-sm font-bold text-clio-900 dark:text-white">+ 1/4</span>
-                <span class="text-[10px] text-clio-sub">+12.5 L</span>
-              </button>
-              <button type="button" onclick="setFraction(0.50)" class="frac-card p-3 rounded-xl border border-clio-200 dark:border-clio-700 text-center active:bg-clio-100">
-                <span class="block text-sm font-bold text-clio-900 dark:text-white">+ 1/2</span>
-                <span class="text-[10px] text-clio-sub">+25.0 L</span>
-              </button>
-              <button type="button" onclick="setFraction(0.75)" class="frac-card p-3 rounded-xl border border-clio-200 dark:border-clio-700 text-center active:bg-clio-100">
-                <span class="block text-sm font-bold text-clio-900 dark:text-white">+ 3/4</span>
-                <span class="text-[10px] text-clio-sub">+37.5 L</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Contenedor Por Dinero -->
-          <div id="rf-view-money" class="hidden space-y-2">
-            <div>
-              <label class="block text-xs font-semibold text-clio-sub mb-1">Monto en pesos ($)</label>
-              <input type="number" id="rf-money-spent" oninput="calcLitersFromCash()" placeholder="Ej: 20000" class="w-full bg-clio-50 dark:bg-clio-800 border border-clio-200 dark:border-clio-700 rounded-xl px-3 py-2 text-base font-bold text-clio-900 dark:text-white focus:outline-none">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-clio-sub mb-1">Precio por litro ($/L)</label>
-              <input type="number" id="rf-price-liter" oninput="calcLitersFromCash()" value="1100" class="w-full bg-clio-50 dark:bg-clio-800 border border-clio-200 dark:border-clio-700 rounded-xl px-3 py-2 text-sm text-clio-900 dark:text-white focus:outline-none">
-            </div>
-            <p class="text-xs text-clio-600 dark:text-clio-300 font-bold" id="rf-money-result">Equivale a 0.0 Litros (+0 km)</p>
-          </div>
-
-          <!-- Estación / Nota -->
-          <div>
-            <label class="block text-xs font-semibold text-clio-sub mb-1">Estación de servicio</label>
-            <input type="text" id="rf-station-note" placeholder="Ej: YPF Villa Ballester, Shell V-Power, Axion" class="w-full bg-clio-50 dark:bg-clio-800 border border-clio-200 dark:border-clio-700 rounded-xl px-3 py-2 text-xs text-clio-900 dark:text-white focus:outline-none focus:border-clio-500">
-          </div>
-
-          <button type="submit" class="w-full py-3.5 rounded-2xl bg-clio-500 hover:bg-clio-600 text-white font-bold text-sm shadow-md active:scale-[0.99] transition mt-2">
-            Confirmar y Cargar al Tanque
-          </button>
-        </form>
-
+    <!-- Atajos Rápidos de Descuento -->
+    <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm">
+      <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-2.5">Descontar viaje rápido</span>
+      <div class="grid grid-cols-4 gap-2">
+        <button onclick="descontarKm(5)" class="py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 font-bold text-sm text-gray-800 active:scale-95 transition">-5 km</button>
+        <button onclick="descontarKm(10)" class="py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 font-bold text-sm text-gray-800 active:scale-95 transition">-10 km</button>
+        <button onclick="descontarKm(20)" class="py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 font-bold text-sm text-gray-800 active:scale-95 transition">-20 km</button>
+        <button onclick="abrirModalManual()" class="py-2.5 rounded-xl bg-clio-100 text-clio-800 font-bold text-sm hover:bg-clio-200 active:scale-95 transition">Otro...</button>
       </div>
     </div>
 
-    <!-- ============================================================ -->
-    <!-- MODAL 3: AJUSTES Y CONFIGURACIÓN DEL CLIO                    -->
-    <!-- ============================================================ -->
-    <div id="modal-config" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex flex-col justify-end hidden">
-      <div class="w-full max-w-md mx-auto bg-white dark:bg-clio-900 rounded-t-[32px] p-5 shadow-2xl modal-enter safe-bottom">
-        
-        <div class="flex items-center justify-between pb-3">
-          <button onclick="closeModal('modal-config')" class="text-clio-sub dark:text-clio-300 text-lg p-1">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-          <span class="text-sm font-bold text-clio-900 dark:text-white">Ajustes del Clio</span>
-          <span class="w-6"></span>
-        </div>
-
-        <form id="form-config" onsubmit="saveConfiguration(event)" class="space-y-3.5 text-xs">
-          <div>
-            <label class="block font-semibold text-clio-sub mb-1">Rendimiento tanque lleno (km)</label>
-            <input type="number" id="cfg-range" value="500" class="w-full bg-clio-50 dark:bg-clio-800 border border-clio-200 dark:border-clio-700 rounded-xl p-3 text-sm font-bold text-clio-900 dark:text-white">
-            <p class="text-[10px] text-clio-sub mt-1">El valor habitual que rinde tu auto (500 km).</p>
-          </div>
-
-          <div>
-            <label class="block font-semibold text-clio-sub mb-1">Capacidad del tanque (Litros)</label>
-            <input type="number" id="cfg-capacity" value="50" class="w-full bg-clio-50 dark:bg-clio-800 border border-clio-200 dark:border-clio-700 rounded-xl p-3 text-sm font-bold text-clio-900 dark:text-white">
-            <p class="text-[10px] text-clio-sub mt-1">El tanque del Clio 2 tiene 50 Litros estándar.</p>
-          </div>
-
-          <div>
-            <label class="block font-semibold text-clio-sub mb-1">Precio de Nafta de Referencia ($/L)</label>
-            <input type="number" id="cfg-price" value="1100" class="w-full bg-clio-50 dark:bg-clio-800 border border-clio-200 dark:border-clio-700 rounded-xl p-3 text-sm font-bold text-clio-900 dark:text-white">
-          </div>
-
-          <div class="pt-2 flex gap-2">
-            <button type="button" onclick="resetAllDataConfirm()" class="w-1/2 py-3 rounded-xl border border-rose-200 text-rose-500 font-bold hover:bg-rose-50">
-              Reset de Fábrica
-            </button>
-            <button type="submit" class="w-1/2 py-3 rounded-xl bg-clio-500 hover:bg-clio-600 text-white font-bold">
-              Guardar
-            </button>
-          </div>
-        </form>
-
+    <!-- KPIs del Clio -->
+    <div class="grid grid-cols-2 gap-3">
+      <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm">
+        <span class="text-[11px] font-medium text-gray-400 uppercase">Consumo Urbano</span>
+        <div class="text-xl font-bold text-gray-900 mt-1">9.6 <span class="text-xs font-normal text-gray-500">L/100km</span></div>
+        <span class="text-[10px] text-gray-400">10.4 km por Litro</span>
+      </div>
+      <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm">
+        <span class="text-[11px] font-medium text-gray-400 uppercase">Km Recorridos</span>
+        <div id="kmRodados" class="text-xl font-bold text-gray-900 mt-1">0 <span class="text-xs font-normal text-gray-500">km</span></div>
+        <span class="text-[10px] text-gray-400">Desde la última carga</span>
       </div>
     </div>
 
-    <!-- TOAST INFORMATIVO FLOTANTE -->
-    <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 bg-clio-900 text-white px-4 py-2.5 rounded-full text-xs font-semibold shadow-2xl flex items-center gap-2 transform -translate-y-16 opacity-0 transition-all duration-300 z-50 pointer-events-none">
-      <i id="toast-icon" class="fa-solid fa-check text-clio-300"></i>
-      <span id="toast-msg">Mensaje</span>
+    <!-- Registro de Carga Parcial -->
+    <div class="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm">
+      <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-2">Cargar Nafta Parcial</span>
+      <div class="flex gap-2">
+        <input type="number" id="inputLitros" placeholder="Litros cargados" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-clio-500">
+        <button onclick="sumarCargaLitros()" class="bg-clio-700 hover:bg-clio-800 text-white font-semibold text-sm px-4 rounded-xl shrink-0 transition active:scale-95">Sumar</button>
+      </div>
     </div>
 
+  </main>
+
+  <!-- Barra de Navegación Inferior Fija (Visible y despegada del borde) -->
+  <nav class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 z-50 safe-bottom">
+    <div class="max-w-md mx-auto flex justify-around items-center h-16 px-2">
+      <button class="flex flex-col items-center justify-center text-clio-700 flex-1">
+        <i class="fa-solid fa-gauge-high text-lg"></i>
+        <span class="text-[10px] font-bold mt-1">Tablero</span>
+      </button>
+      <button onclick="calibrarLleno()" class="flex flex-col items-center justify-center text-gray-400 hover:text-gray-700 flex-1">
+        <i class="fa-solid fa-gas-pump text-lg"></i>
+        <span class="text-[10px] font-medium mt-1">Tanque Lleno</span>
+      </button>
+      <button onclick="abrirModalManual()" class="flex flex-col items-center justify-center text-gray-400 hover:text-gray-700 flex-1">
+        <i class="fa-solid fa-road text-lg"></i>
+        <span class="text-[10px] font-medium mt-1">Cargar Km</span>
+      </button>
+      <button onclick="resetearTodo()" class="flex flex-col items-center justify-center text-gray-400 hover:text-red-500 flex-1">
+        <i class="fa-solid fa-arrow-rotate-left text-lg"></i>
+        <span class="text-[10px] font-medium mt-1">Reset</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Modal Carga Manual -->
+  <div id="modalManual" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-xs rounded-2xl p-5 shadow-2xl space-y-4">
+      <h3 class="font-bold text-gray-900 text-base">Registrar viaje recorrido</h3>
+      <input type="number" id="inputKmManual" placeholder="Ej: 14.5" class="w-full bg-gray-50 border border-gray-300 rounded-xl p-3 text-lg font-bold text-center focus:ring-2 focus:ring-clio-500 outline-none">
+      <div class="flex gap-2">
+        <button onclick="cerrarModalManual()" class="w-1/2 py-2.5 rounded-xl border border-gray-300 font-semibold text-sm text-gray-600">Cancelar</button>
+        <button onclick="confirmarKmManual()" class="w-1/2 py-2.5 rounded-xl bg-clio-700 font-semibold text-sm text-white">Descontar</button>
+      </div>
+    </div>
   </div>
 
-  <!-- LÓGICA PRINCIPAL JAVASCRIPT -->
   <script>
-    const STORAGE_KEY = 'miclio_nafta_data_v1';
+    // Parámetros Renault Clio 1.6 16v (K4M)
+    const CAPACIDAD_TANQUE = 50.0; // Litros
+    const CONSUMO_CIUDAD = 9.6;    // L / 100km
+    const KM_POR_LITRO = 100 / CONSUMO_CIUDAD; // 10.416 km/L
+    const KM_MAX_AUTONOMIA = Math.round(CAPACIDAD_TANQUE * KM_POR_LITRO); // ~520 km
 
-    // Estado de la app
-    let state = {
-      capacity: 50,           // Litros tanque Renault Clio
-      fullRange: 500,         // Km rinde lleno
-      pricePerLiter: 1100,    // $ por litro
-      currentKm: 385,         // Km restantes actuales
-      kmSinceFull: 115,       // Km andados desde el último 100%
-      darkMode: false,
-      history: []
+    let datos = JSON.parse(localStorage.getItem('clio_combustible')) || {
+      litros: CAPACIDAD_TANQUE,
+      kmRodados: 0
     };
 
-    // Datos iniciales realistas para que coincida de inmediato con la visual de la app de gastos
-    const defaultHistory = [
-      { id: 1, type: 'trip', title: 'Viaje Trabajo / San Martín', km: 24, effectiveKm: 24, date: 'Hoy, 08:30', liters: 2.4 },
-      { id: 2, type: 'refuel', title: 'Carga Nafta Súper', liters: 15, kmGained: 150, date: 'Ayer, 18:20', isFull: false, station: 'YPF Villa Ballester' },
-      { id: 3, type: 'trip', title: 'Acceso Norte / Panamericana', km: 45, effectiveKm: 38.2, date: '10/04, 14:10', liters: 3.8 },
-      { id: 4, type: 'full', title: '¡Tanque Lleno! (Reset odómetro)', liters: 50, kmGained: 500, date: '08/04, 09:15', isFull: true }
-    ];
-
-    // Variables del Numpad
-    let currentNumpadValue = '0';
-    let currentTripType = 'mixed';
-
-    window.addEventListener('DOMContentLoaded', () => {
-      loadState();
-      applyTheme();
-      updateDashboard();
-      renderHistory();
-    });
-
-    function saveState() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    function guardarYActualizar() {
+      localStorage.setItem('clio_combustible', JSON.stringify(datos));
+      render();
     }
 
-    function loadState() {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        try {
-          state = JSON.parse(stored);
-        } catch (e) {
-          console.error(e);
-        }
+    function render() {
+      const kmRestantes = Math.max(0, Math.round(datos.litros * KM_POR_LITRO));
+      const porcentaje = Math.min(100, Math.max(0, (datos.litros / CAPACIDAD_TANQUE) * 100));
+
+      document.getElementById('kmRestantes').innerText = kmRestantes;
+      document.getElementById('litrosRestantes').innerText = datos.litros.toFixed(1);
+      document.getElementById('kmRodados').innerHTML = `${datos.kmRodados.toFixed(0)} <span class="text-xs font-normal text-gray-500">km</span>`;
+
+      const barra = document.getElementById('barraProgreso');
+      barra.style.width = porcentaje + '%';
+
+      const badge = document.getElementById('badgeNivel');
+      if (porcentaje <= 15) {
+        badge.className = 'text-xs font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700';
+        badge.innerText = '¡Reserva!';
+        barra.className = 'bg-red-500 h-full rounded-full transition-all duration-500';
+      } else if (porcentaje <= 35) {
+        badge.className = 'text-xs font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700';
+        badge.innerText = 'Bajo Nivel';
+        barra.className = 'bg-amber-500 h-full rounded-full transition-all duration-500';
       } else {
-        state.history = defaultHistory;
-        saveState();
+        badge.className = 'text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700';
+        badge.innerText = 'Nivel Óptimo';
+        barra.className = 'bg-clio-600 h-full rounded-full transition-all duration-500';
       }
     }
 
-    // ==========================================
-    // ACTUALIZACIÓN DE INTERFAZ & MEDIDOR
-    // ==========================================
-    function updateDashboard() {
-      // Limites seguros
-      state.currentKm = Math.max(0, Math.min(state.currentKm, state.fullRange));
-      
-      const percent = Math.round((state.currentKm / state.fullRange) * 100);
-      const liters = ((state.currentKm / state.fullRange) * state.capacity).toFixed(1);
-      const money = Math.round(liters * state.pricePerLiter).toLocaleString('es-AR');
-      const kmL = (state.fullRange / state.capacity).toFixed(1);
-
-      // Hero Elements
-      document.getElementById('hero-km').innerText = Math.round(state.currentKm);
-      document.getElementById('hero-subliters').innerText = `≈ ${liters} L de ${state.capacity} L (${percent}%)`;
-      document.getElementById('hero-percent').innerText = `${percent}%`;
-
-      // Barra de medidor
-      const gaugeBar = document.getElementById('gauge-bar');
-      gaugeBar.style.width = `${percent}%`;
-
-      // Estados de alerta en el medidor
-      const badge = document.getElementById('tank-badge');
-      const badgeText = document.getElementById('tank-badge-text');
-
-      if (state.currentKm <= 75) {
-        // Reserva / Bajo
-        gaugeBar.className = 'h-full bg-rose-500 rounded-full transition-all duration-700 ease-out';
-        badge.className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-300 border border-rose-200 dark:border-rose-800 animate-pulse';
-        badgeText.innerText = '¡RESERVA!';
-      } else if (state.currentKm <= 180) {
-        gaugeBar.className = 'h-full bg-amber-500 rounded-full transition-all duration-700 ease-out';
-        badge.className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-300 border border-amber-200 dark:border-amber-800';
-        badgeText.innerText = 'Nivel Medio';
-      } else {
-        gaugeBar.className = 'h-full bg-gradient-to-r from-clio-400 to-clio-500 dark:from-clio-500 dark:to-clio-400 rounded-full transition-all duration-700 ease-out';
-        badge.className = 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-clio-50 dark:bg-clio-800/60 text-clio-700 dark:text-clio-200 border border-clio-200 dark:border-clio-700';
-        badgeText.innerText = 'Nivel Óptimo';
-      }
-
-      // KPIs
-      document.getElementById('kpi-km-done').innerText = Math.round(state.kmSinceFull);
-      document.getElementById('kpi-liters-left').innerText = liters;
-      document.getElementById('kpi-rend').innerText = kmL;
-      document.getElementById('kpi-money-left').innerText = money;
-
-      // Actualizar valores en settings
-      document.getElementById('cfg-range').value = state.fullRange;
-      document.getElementById('cfg-capacity').value = state.capacity;
-      document.getElementById('cfg-price').value = state.pricePerLiter;
+    function descontarKm(km) {
+      const litrosGastados = km / KM_POR_LITRO;
+      datos.litros = Math.max(0, datos.litros - litrosGastados);
+      datos.kmRodados += km;
+      guardarYActualizar();
     }
 
-    // ==========================================
-    // RENDERIZADO DE ÚLTIMOS MOVIMIENTOS
-    // (Idéntico a las filas de MiPlata)
-    // ==========================================
-    function renderHistory() {
-      const list = document.getElementById('recent-list');
-      const empty = document.getElementById('empty-state');
-      list.innerHTML = '';
+    function calibrarLleno() {
+      datos.litros = CAPACIDAD_TANQUE;
+      datos.kmRodados = 0;
+      guardarYActualizar();
+    }
 
-      if (!state.history || state.history.length === 0) {
-        empty.classList.remove('hidden');
-        return;
+    function sumarCargaLitros() {
+      const input = document.getElementById('inputLitros');
+      const val = parseFloat(input.value);
+      if (!isNaN(val) && val > 0) {
+        datos.litros = Math.min(CAPACIDAD_TANQUE, datos.litros + val);
+        input.value = '';
+        guardarYActualizar();
       }
-      empty.classList.add('hidden');
+    }
 
-      state.history.slice(0, 6).forEach(item => {
-        const isRefuel = item.type === 'refuel' || item.type === 'full';
-        
-        // Colores y badges estilo MiPlata
-        let iconBg = 'bg-clio-100 dark:bg-clio-800 text-clio-600 dark:text-clio-300';
-        let icon = 'fa-car-side';
-        let amountText = `-${item.km} km`;
-        let amountClass = 'text-clio-900 dark:text-white font-extrabold';
+    function abrirModalManual() {
+      document.getElementById('modalManual').classList.remove('hidden');
+      document.getElementById('inputKmManual').focus();
+    }
 
-        if (item.type === 'full') {
-          iconBg = 'bg-clio-500 text-white';
-          icon = 'fa-arrows-rotate';
-          amountText = 'Lleno 100%';
-          amountClass = 'text-clio-600 dark:text-clio-400 font-extrabold';
-        } else if (item.type === 'refuel') {
-          iconBg = 'bg-amber-50 dark:bg-amber-950/40 text-amber-600';
-          icon = 'fa-gas-pump';
-          amountText = `+${item.liters} L`;
-          amountClass = 'text-amber-600 dark:text-amber-400 font-extrabold';
-        }
+    function cerrarModalManual() {
+      document.getElementById('modalManual').classList.add('hidden');
+    }
 
-        const card = document.createElement('div');
-        card.className = 'bg-appCard dark:bg-clio-900 rounded-[18px] p-3 shadow-card border border-clio-100/60 dark:border-clio-800/60 flex items-center justify-between active:scale-[0.99] transition';
-        card.innerHTML = `
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl ${iconBg} flex items-center justify-center text-sm shadow-xs">
-              <i class="fa-solid ${icon}"></i>
-            </div>
-            <div>
-              <h4 class="text-xs font-bold text-clio-900 dark:text-white leading-tight">${item.title}</h4>
-              <p class="text-[10px] text-clio-sub mt-0.5">${item.date}</p>
-            </div>
-          </div>
-          <div class="text-right flex items-center gap-2">
-            <span class="text-sm ${amountClass}">${amountText}</span>
-            <button onclick="deleteHistoryItem(${item.id})" class="text-clio-sub/40 hover:text-rose-500 p-1 text-xs">
-              <i class="fa-solid fa-trash-can"></i>
-            </button>
-          </div>
-        `;
-        list.appendChild(card);
+    function confirmarKmManual() {
+      const val = parseFloat(document.getElementById('inputKmManual').value);
+      if (!isNaN(val) && val > 0) {
+        descontarKm(val);
+        document.getElementById('inputKmManual').value = '';
+        cerrarModalManual();
+      }
+    }
+
+    function resetearTodo() {
+      if (confirm('¿Reiniciar a tanque lleno (50L)?')) {
+        calibrarLleno();
+      }
+    }
+
+    // Registro de Service Worker para habilitar PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW error:', err));
       });
     }
 
-    // ==========================================
-    // OPERACIÓN RÁPIDA: "¡LLENÉ EL TANQUE!"
-    // ==========================================
-    function quickFullTankPrompt() {
-      state.currentKm = state.fullRange;
-      state.kmSinceFull = 0; // Reinicio del odómetro parcial
-
-      state.history.unshift({
-        id: Date.now(),
-        type: 'full',
-        title: '¡Tanque Lleno! (Reset odómetro)',
-        liters: state.capacity,
-        kmGained: state.fullRange,
-        date: getFormattedDate(),
-        isFull: true
-      });
-
-      saveState();
-      updateDashboard();
-      renderHistory();
-      showToast('¡Tanque Lleno! Autonomía reseteada a 500 km', 'fa-arrows-rotate');
-    }
-
-    // ==========================================
-    // DESCUENTO RÁPIDO DE VIAJES
-    // ==========================================
-    function quickAddTrip(km, title) {
-      if (state.currentKm <= 0) {
-        showToast('El auto ya está sin combustible estimado', 'fa-triangle-exclamation');
-        return;
-      }
-
-      state.currentKm = Math.max(0, state.currentKm - km);
-      state.kmSinceFull += km;
-
-      const litersUsed = ((km / state.fullRange) * state.capacity).toFixed(1);
-
-      state.history.unshift({
-        id: Date.now(),
-        type: 'trip',
-        title: title || `Viaje de ${km} km`,
-        km: km,
-        effectiveKm: km,
-        date: getFormattedDate(),
-        liters: litersUsed
-      });
-
-      saveState();
-      updateDashboard();
-      renderHistory();
-      showToast(`-${km} km descontados (${litersUsed} L)`, 'fa-check');
-    }
-
-    // ==========================================
-    // TECLADO NUMÉRICO (MODAL ALTA DE VIAJE)
-    // ==========================================
-    function openTripModal() {
-      currentNumpadValue = '0';
-      updateNumpadDisplay();
-      openModal('modal-trip');
-    }
-
-    function pressNum(val) {
-      if (currentNumpadValue === '0' && val !== '.') {
-        currentNumpadValue = String(val);
-      } else {
-        if (val === '.' && currentNumpadValue.includes('.')) return;
-        if (currentNumpadValue.length < 5) {
-          currentNumpadValue += String(val);
-        }
-      }
-      updateNumpadDisplay();
-    }
-
-    function pressBackspace() {
-      if (currentNumpadValue.length > 1) {
-        currentNumpadValue = currentNumpadValue.slice(0, -1);
-      } else {
-        currentNumpadValue = '0';
-      }
-      updateNumpadDisplay();
-    }
-
-    function clearTripNumpad() {
-      currentNumpadValue = '0';
-      updateNumpadDisplay();
-    }
-
-    function updateNumpadDisplay() {
-      document.getElementById('numpad-display').innerText = currentNumpadValue;
-      const km = parseFloat(currentNumpadValue) || 0;
-      const liters = ((km / state.fullRange) * state.capacity).toFixed(1);
-      document.getElementById('numpad-calc-preview').innerText = `Descontará aprox. ${liters} Litros de combustible`;
-    }
-
-    function setTripType(type) {
-      currentTripType = type;
-      const types = ['city', 'mixed', 'highway'];
-      types.forEach(t => {
-        const btn = document.getElementById(`type-${t}`);
-        if (t === type) {
-          btn.className = 'flex-1 py-2 px-2 rounded-xl text-xs font-bold bg-clio-500 text-white shadow-sm';
-        } else {
-          btn.className = 'flex-1 py-2 px-2 rounded-xl text-xs font-bold border border-clio-200 dark:border-clio-700 text-clio-sub';
-        }
-      });
-    }
-
-    function submitTripFromNumpad() {
-      const km = parseFloat(currentNumpadValue);
-      if (isNaN(km) || km <= 0) {
-        showToast('Ingresá los kilómetros recorridos', 'fa-triangle-exclamation');
-        return;
-      }
-
-      let factor = 1.0;
-      if (currentTripType === 'city') factor = 1.15;
-      if (currentTripType === 'highway') factor = 0.85;
-
-      const effectiveKm = km * factor;
-      const desc = document.getElementById('trip-desc').value.trim() || `Viaje (${currentTripType.toUpperCase()})`;
-      const litersUsed = ((effectiveKm / state.fullRange) * state.capacity).toFixed(1);
-
-      state.currentKm = Math.max(0, state.currentKm - effectiveKm);
-      state.kmSinceFull += km;
-
-      state.history.unshift({
-        id: Date.now(),
-        type: 'trip',
-        title: desc,
-        km: km,
-        effectiveKm: effectiveKm,
-        date: getFormattedDate(),
-        liters: litersUsed
-      });
-
-      document.getElementById('trip-desc').value = '';
-      closeModal('modal-trip');
-      saveState();
-      updateDashboard();
-      renderHistory();
-      showToast(`Viaje guardado: -${km} km`, 'fa-car-side');
-    }
-
-    // ==========================================
-    // CARGA DE COMBUSTIBLE (PARCIAL O TOTAL)
-    // ==========================================
-    let refuelMode = 'liters';
-    let selectedFraction = 0;
-
-    function openRefuelModal() {
-      openModal('modal-refuel');
-      switchRefuelMode('liters');
-    }
-
-    function switchRefuelMode(mode) {
-      refuelMode = mode;
-      const modes = ['liters', 'fraction', 'money'];
-      modes.forEach(m => {
-        const btn = document.getElementById(`rf-tab-${m}`);
-        const view = document.getElementById(`rf-view-${m}`);
-        if (m === mode) {
-          btn.className = 'flex-1 py-1.5 rounded-lg bg-white dark:bg-clio-900 text-clio-700 dark:text-clio-200 font-bold shadow-sm';
-          view.classList.remove('hidden');
-        } else {
-          btn.className = 'flex-1 py-1.5 rounded-lg text-clio-sub';
-          view.classList.add('hidden');
-        }
-      });
-    }
-
-    function setRefuelQuick(liters) {
-      document.getElementById('rf-liters-input').value = liters;
-    }
-
-    function setFraction(frac) {
-      selectedFraction = frac;
-      const lts = (state.capacity * frac).toFixed(1);
-      showToast(`Seleccionado: ${frac * 4}/4 (+${lts} L)`, 'fa-fill-drip');
-    }
-
-    function calcLitersFromCash() {
-      const money = parseFloat(document.getElementById('rf-money-spent').value) || 0;
-      const price = parseFloat(document.getElementById('rf-price-liter').value) || state.pricePerLiter;
-      if (money > 0 && price > 0) {
-        const lts = (money / price).toFixed(1);
-        const kmGained = Math.round((lts / state.capacity) * state.fullRange);
-        document.getElementById('rf-money-result').innerText = `Equivale a ${lts} Litros (+${kmGained} km de autonomía)`;
-      } else {
-        document.getElementById('rf-money-result').innerText = `Equivale a 0.0 Litros (+0 km)`;
-      }
-    }
-
-    function submitRefuel(e) {
-      e.preventDefault();
-      let litersToAdd = 0;
-
-      if (refuelMode === 'liters') {
-        litersToAdd = parseFloat(document.getElementById('rf-liters-input').value);
-      } else if (refuelMode === 'fraction') {
-        litersToAdd = state.capacity * selectedFraction;
-      } else if (refuelMode === 'money') {
-        const money = parseFloat(document.getElementById('rf-money-spent').value) || 0;
-        const price = parseFloat(document.getElementById('rf-price-liter').value) || state.pricePerLiter;
-        if (money > 0 && price > 0) litersToAdd = money / price;
-      }
-
-      if (isNaN(litersToAdd) || litersToAdd <= 0) {
-        showToast('Indicá la cantidad de litros a cargar', 'fa-triangle-exclamation');
-        return;
-      }
-
-      const kmToAdd = (litersToAdd / state.capacity) * state.fullRange;
-      const prevKm = state.currentKm;
-      state.currentKm = Math.min(state.fullRange, state.currentKm + kmToAdd);
-      const isFull = state.currentKm >= state.fullRange;
-
-      const station = document.getElementById('rf-station-note').value.trim() || 'Carga de Nafta';
-
-      state.history.unshift({
-        id: Date.now(),
-        type: isFull ? 'full' : 'refuel',
-        title: isFull ? 'Tanque Completo' : station,
-        liters: Number(litersToAdd.toFixed(1)),
-        kmGained: Math.round(state.currentKm - prevKm),
-        date: getFormattedDate(),
-        isFull: isFull
-      });
-
-      document.getElementById('form-refuel-action').reset();
-      closeModal('modal-refuel');
-      saveState();
-      updateDashboard();
-      renderHistory();
-      showToast(`+${litersToAdd.toFixed(1)} L cargados al Clio`, 'fa-gas-pump');
-    }
-
-    // ==========================================
-    // AJUSTES & CONFIGURACIÓN
-    // ==========================================
-    function saveConfiguration(e) {
-      e.preventDefault();
-      const r = parseFloat(document.getElementById('cfg-range').value);
-      const c = parseFloat(document.getElementById('cfg-capacity').value);
-      const p = parseFloat(document.getElementById('cfg-price').value);
-
-      if (r > 50 && c > 10) {
-        state.fullRange = r;
-        state.capacity = c;
-        state.pricePerLiter = p;
-        saveState();
-        updateDashboard();
-        closeModal('modal-config');
-        showToast('Ajustes del auto actualizados', 'fa-check');
-      }
-    }
-
-    function resetAllDataConfirm() {
-      state.currentKm = 500;
-      state.kmSinceFull = 0;
-      state.history = defaultHistory;
-      saveState();
-      updateDashboard();
-      renderHistory();
-      closeModal('modal-config');
-      showToast('Datos reiniciados con éxito', 'fa-check');
-    }
-
-    // ==========================================
-    // UTILIDADES GENERALES
-    // ==========================================
-    function deleteHistoryItem(id) {
-      state.history = state.history.filter(item => item.id !== id);
-      saveState();
-      renderHistory();
-      showToast('Registro eliminado', 'fa-trash-can');
-    }
-
-    function openModal(id) {
-      document.getElementById(id).classList.remove('hidden');
-    }
-
-    function closeModal(id) {
-      document.getElementById(id).classList.add('hidden');
-    }
-
-    function toggleDarkMode() {
-      state.darkMode = !state.darkMode;
-      applyTheme();
-      saveState();
-    }
-
-    function applyTheme() {
-      const html = document.documentElement;
-      const icon = document.getElementById('theme-icon');
-      if (state.darkMode) {
-        html.classList.add('dark');
-        icon.className = 'fa-regular fa-sun';
-      } else {
-        html.classList.remove('dark');
-        icon.className = 'fa-regular fa-moon';
-      }
-    }
-
-    function getFormattedDate() {
-      const now = new Date();
-      return `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth()+1).toString().padStart(2, '0')}, ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-    }
-
-    function cycleTankMode() {
-      showToast('Estás viendo el tanque en curso.', 'fa-circle-info');
-    }
-
-    function openHistoryFullModal() {
-      showToast(`Total de ${state.history.length} movimientos registrados.`, 'fa-clock-rotate-left');
-    }
-
-    function switchTab(name) {
-      const main = document.getElementById('main-scroll');
-      main.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    let toastTimer = null;
-    function showToast(msg, icon = 'fa-check') {
-      const toast = document.getElementById('toast');
-      const toastMsg = document.getElementById('toast-msg');
-      const toastIcon = document.getElementById('toast-icon');
-
-      toastMsg.innerText = msg;
-      toastIcon.className = `fa-solid ${icon} text-clio-300`;
-
-      toast.classList.remove('-translate-y-16', 'opacity-0');
-      toast.classList.add('translate-y-0', 'opacity-100');
-
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => {
-        toast.classList.remove('translate-y-0', 'opacity-100');
-        toast.classList.add('-translate-y-16', 'opacity-0');
-      }, 2600);
-    }
+    render();
   </script>
 </body>
 </html>

@@ -169,7 +169,7 @@
         </div>
       </div>
 
-      <!-- BANNER DE CICLO ENTRE TANQUES LLENOS (AUDITORÍA DE CONSUMO) -->
+      <!-- BANNER DE CICLO ENTRE TANQUES LLENOS -->
       <div class="bg-white dark:bg-[#1c221f] rounded-2xl p-3.5 border border-gray-200/80 dark:border-white/5 shadow-sm flex items-center justify-between">
         <div class="flex items-center gap-3">
           <div class="w-9 h-9 rounded-xl bg-clio-500/15 text-clio-500 flex items-center justify-center shrink-0">
@@ -227,7 +227,7 @@
       <!-- ÚLTIMOS MOVIMIENTOS -->
       <div class="bg-white dark:bg-[#1c221f] rounded-2xl p-4 border border-gray-200/80 dark:border-white/5 shadow-sm">
         <div class="flex items-center justify-between mb-3">
-          <h2 class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Últimos Movimientos</h2>
+          <h2 class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Últimos Movimientos (Editar / Borrar)</h2>
           <button onclick="irASeccion('historial')" class="text-xs font-bold text-clio-600 dark:text-clio-400">Ver todos</button>
         </div>
         <div id="listaRecientes" class="space-y-2.5"></div>
@@ -240,8 +240,8 @@
       <div class="bg-white dark:bg-[#1c221f] rounded-2xl p-4 border border-gray-200/80 dark:border-white/5 shadow-sm">
         <div class="flex items-center justify-between mb-3">
           <div>
-            <h2 class="text-base font-extrabold text-gray-900 dark:text-white">Bitácora y Mediciones</h2>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Viajes, cargas y verificaciones de consumo</p>
+            <h2 class="text-base font-extrabold text-gray-900 dark:text-white">Bitácora de Viajes y Cargas</h2>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Podés editar (<i class="fa-solid fa-pen text-[10px]"></i>) o borrar (<i class="fa-solid fa-trash-can text-[10px]"></i>) cualquier ítem</p>
           </div>
           <span id="contadorMovimientos" class="text-xs font-bold px-2.5 py-1 rounded-lg bg-clio-500/10 text-clio-600 dark:text-clio-300">0 reg.</span>
         </div>
@@ -372,7 +372,7 @@
   </nav>
 
   <!-- =======================================================================
-       MODAL 1: NUEVO RECORRIDO (+) CON TECLADO NUMÉRICO
+       MODAL 1: NUEVO / EDITAR RECORRIDO (+) CON TECLADO NUMÉRICO
        ======================================================================= -->
   <div id="modalViaje" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex flex-col justify-end">
     <div class="bg-[#f4f6f4] dark:bg-[#161b18] w-full max-w-md mx-auto rounded-t-3xl p-5 shadow-2xl border-t border-white/10 space-y-3.5">
@@ -380,7 +380,7 @@
         <button onclick="cerrarModalViaje()" class="w-8 h-8 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-600 dark:text-gray-300">
           <i class="fa-solid fa-xmark"></i>
         </button>
-        <h3 class="text-sm font-extrabold uppercase tracking-wider text-gray-600 dark:text-gray-300">Nuevo Recorrido</h3>
+        <h3 id="tituloModalViaje" class="text-sm font-extrabold uppercase tracking-wider text-gray-600 dark:text-gray-300">Nuevo Recorrido</h3>
         <div class="w-8"></div>
       </div>
 
@@ -422,7 +422,7 @@
 
       <input type="text" id="inputNotaViaje" placeholder="Nota opcional (ej. Trabajo, Centro, Paseo...)" class="w-full bg-white dark:bg-[#1f2622] border border-gray-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-gray-800 dark:text-gray-100 outline-none">
 
-      <button onclick="guardarViaje()" class="w-full py-3.5 rounded-2xl bg-clio-500 hover:bg-clio-600 text-white font-extrabold text-sm shadow-lg active:scale-95 transition">
+      <button id="btnConfirmarViaje" onclick="guardarViaje()" class="w-full py-3.5 rounded-2xl bg-clio-500 hover:bg-clio-600 text-white font-extrabold text-sm shadow-lg active:scale-95 transition">
         Descontar Recorrido
       </button>
 
@@ -444,12 +444,12 @@
   </div>
 
   <!-- =======================================================================
-       MODAL 2: CARGAR COMBUSTIBLE (PIDE LITROS EN TANQUE LLENO Y CALCULA CONSUMO)
+       MODAL 2: CARGAR / EDITAR COMBUSTIBLE
        ======================================================================= -->
   <div id="modalCarga" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
     <div class="bg-[#f4f6f4] dark:bg-[#181e1b] w-full max-w-sm rounded-3xl p-5 shadow-2xl border border-white/10 space-y-4 my-auto">
       <div class="flex items-center justify-between">
-        <h3 class="text-base font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
+        <h3 id="tituloModalCarga" class="text-base font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
           <i class="fa-solid fa-gas-pump text-clio-500"></i> Cargar Combustible
         </h3>
         <button onclick="cerrarModalCarga()" class="w-8 h-8 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center">
@@ -467,7 +467,7 @@
         </button>
       </div>
 
-      <!-- Input de Litros (Ahora se pide TANTO en lleno como en parcial) -->
+      <!-- Input de Litros -->
       <div id="contenedorInputLitros" class="space-y-2">
         <div class="flex items-center justify-between">
           <label id="labelLitrosSurtidor" class="text-xs font-bold text-gray-600 dark:text-gray-300">
@@ -477,23 +477,22 @@
         </div>
         <input type="number" step="0.01" id="inputLitrosCarga" placeholder="Ej: 38.5" class="w-full bg-white dark:bg-[#222a26] border border-gray-300 dark:border-white/10 rounded-xl p-3 text-lg font-extrabold text-center outline-none focus:ring-2 focus:ring-clio-500">
         
-        <!-- Opción para cuando es el 1er tanque lleno y no sabemos los litros previos -->
         <label id="checkPrimerLlenoWrapper" class="flex items-center gap-2 text-[11px] text-gray-500 dark:text-gray-400 pt-0.5 cursor-pointer">
           <input type="checkbox" id="checkPrimerLleno" onchange="togglePrimerLleno()" class="rounded text-clio-500 focus:ring-clio-500">
-          <span>No sé cuántos litros entraron / Solo iniciar ciclo a 50L</span>
+          <span>No sé cuántos litros entraron / Solo fijar base a 50L</span>
         </label>
       </div>
 
       <!-- Input obligatorio: KM del Tablero -->
       <div class="space-y-1.5">
         <label class="text-xs font-bold text-gray-600 dark:text-gray-300 flex items-center justify-between">
-          <span>Km actuales en el tablero</span>
+          <span>Km en el tablero al cargar</span>
           <span class="text-[10px] font-semibold text-clio-500">Obligatorio</span>
         </label>
         <input type="number" id="inputOdometroCarga" placeholder="Ej: 185420" class="w-full bg-white dark:bg-[#222a26] border border-gray-300 dark:border-white/10 rounded-xl p-3 text-lg font-extrabold text-center outline-none focus:ring-2 focus:ring-clio-500">
       </div>
 
-      <!-- Selector de Uso del Tanque (Para saber si fue un mismo tipo de uso al cerrar tanque lleno) -->
+      <!-- Selector de Uso del Tanque -->
       <div id="bloqueUsoTanque" class="space-y-1.5 pt-1 border-t border-gray-200 dark:border-white/10">
         <label class="text-xs font-bold text-gray-600 dark:text-gray-300 block">
           ¿Qué uso tuvo el auto desde el último lleno?
@@ -508,14 +507,14 @@
         <p id="previewCicloInfo" class="text-[11px] text-gray-500 dark:text-gray-400"></p>
       </div>
 
-      <button onclick="confirmarCargaCombustible()" class="w-full py-3.5 rounded-2xl bg-clio-500 hover:bg-clio-600 text-white font-extrabold text-sm shadow-lg active:scale-95 transition">
+      <button id="btnConfirmarCarga" onclick="confirmarCargaCombustible()" class="w-full py-3.5 rounded-2xl bg-clio-500 hover:bg-clio-600 text-white font-extrabold text-sm shadow-lg active:scale-95 transition">
         Registrar Carga
       </button>
     </div>
   </div>
 
   <!-- =======================================================================
-       MODAL 3: RESULTADO DE VERIFICACIÓN DE CONSUMO REAL (CORTE A CORTE)
+       MODAL 3: RESULTADO DE VERIFICACIÓN DE CONSUMO REAL
        ======================================================================= -->
   <div id="modalResultadoConsumo" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white dark:bg-[#181e1b] w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-clio-500/40 space-y-4 text-center">
@@ -579,6 +578,7 @@
       capacidadTanque: 50.0,
       litrosActuales: 50.0,
       kmParcialDesdeCarga: 0.0,
+      odometroBaseInicial: null,
       odometroActual: null,
       ultimaCargaOdometro: null,
       ultimaCargaTipo: 'Sin registros',
@@ -588,35 +588,115 @@
         mixto: 8.2,
         ruta: 6.8
       },
-      // Seguimiento entre Tanque Lleno y Tanque Lleno
       cicloLleno: {
         activo: true,
-        odometroInicioLleno: null, // Odómetro cuando se llenó por última vez
-        litrosParcialesAcumulados: 0.0, // Suma de cargas parciales hechas en el medio
-        kmPorEstilo: { calle: 0, mixto: 0, ruta: 0 } // Viajes registrados desde el último lleno
+        odometroInicioLleno: null,
+        litrosParcialesAcumulados: 0.0,
+        kmPorEstilo: { calle: 0, mixto: 0, ruta: 0 }
       },
       historial: []
     };
 
-    // Migración suave si ya tenía datos de la v2
     let saved = JSON.parse(localStorage.getItem(STORAGE_KEY)) || JSON.parse(localStorage.getItem('miclio_v2_data'));
     let state = Object.assign({}, defaultData, saved || {});
-    if (!state.cicloLleno) {
-      state.cicloLleno = {
-        activo: true,
-        odometroInicioLleno: state.ultimaCargaOdometro || state.odometroActual,
-        litrosParcialesAcumulados: 0,
-        kmPorEstilo: { calle: 0, mixto: 0, ruta: 0 }
-      };
+    if (!state.odometroBaseInicial && state.odometroActual) {
+      state.odometroBaseInicial = state.odometroActual;
     }
 
+    // Estado de edición
     let bufferViajeKm = '0';
     let estiloViajeSeleccionado = 'calle';
     let tipoCargaSeleccionado = 'lleno';
+    let editandoViajeId = null;
+    let editandoCargaId = null;
 
     function saveState() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       renderAll();
+    }
+
+    // ==================== MOTOR DE RECÁLCULO EN CADENA ====================
+    // Recorre el historial desde el más antiguo al más reciente para que editar o borrar
+    // cualquier viaje o carga de nafta recalcule exactamente litros, odómetro y ciclos.
+    function recalcularEstadoDesdeHistorial() {
+      const cap = state.capacidadTanque;
+      let litros = cap;
+      let kmParcial = 0;
+      let odo = state.odometroBaseInicial || state.odometroActual || null;
+      let ultCargaOdo = state.odometroBaseInicial || null;
+      let ultCargaTipo = 'Sin registros';
+
+      let ciclo = {
+        activo: true,
+        odometroInicioLleno: state.odometroBaseInicial || null,
+        litrosParcialesAcumulados: 0.0,
+        kmPorEstilo: { calle: 0, mixto: 0, ruta: 0 }
+      };
+
+      // Procesar de más viejo a más nuevo
+      const cronologico = [...state.historial].reverse();
+
+      for (const item of cronologico) {
+        if (item.tipo === 'viaje') {
+          const consumo = state.consumos[item.estilo] || state.consumos.calle;
+          item.litros = (item.km * consumo) / 100;
+          litros = Math.max(0, litros - item.litros);
+          kmParcial += item.km;
+          if (odo !== null) {
+            odo = Number(odo) + item.km;
+            item.odometro = Math.round(odo);
+          }
+          ciclo.kmPorEstilo[item.estilo] = (ciclo.kmPorEstilo[item.estilo] || 0) + item.km;
+        } else if (item.tipo === 'carga') {
+          odo = Number(item.odometro);
+          ultCargaOdo = odo;
+          kmParcial = 0;
+
+          if (item.subtipo === 'parcial') {
+            litros = Math.min(cap, litros + Number(item.litros));
+            ciclo.litrosParcialesAcumulados += Number(item.litros);
+            ultCargaTipo = `Parcial (+${Number(item.litros).toFixed(1)}L)`;
+            item.nota = `Carga Parcial (+${Number(item.litros).toFixed(1)}L) · Acumulado ciclo: ${ciclo.litrosParcialesAcumulados.toFixed(1)}L`;
+          } else {
+            // Tanque lleno
+            const esPrimer = item.esPrimerLleno || Number(item.litros) <= 0;
+            if (!esPrimer && ciclo.odometroInicioLleno && odo > ciclo.odometroInicioLleno) {
+              const kmTotalesCiclo = odo - ciclo.odometroInicioLleno;
+              const litrosTotalesConsumidos = ciclo.litrosParcialesAcumulados + Number(item.litros);
+              const consumoReal = (litrosTotalesConsumidos / kmTotalesCiclo) * 100;
+              item.verificacion = {
+                kmTotalesCiclo,
+                litrosParciales: ciclo.litrosParcialesAcumulados,
+                litrosUltimoLlenado: Number(item.litros),
+                litrosTotalesConsumidos,
+                consumoReal: Number(consumoReal.toFixed(2)),
+                estiloDominante: item.estiloCiclo || 'calle'
+              };
+              item.nota = `Tanque Lleno (+${Number(item.litros).toFixed(1)}L) · Medido: ${item.verificacion.consumoReal} L/100`;
+              ultCargaTipo = `Lleno (+${Number(item.litros).toFixed(1)}L)`;
+            } else {
+              item.verificacion = null;
+              item.nota = `Tanque Lleno (Base de ciclo fijada)`;
+              ultCargaTipo = 'Tanque Lleno (Inicio)';
+            }
+
+            litros = cap;
+            ciclo = {
+              activo: true,
+              odometroInicioLleno: odo,
+              litrosParcialesAcumulados: 0.0,
+              kmPorEstilo: { calle: 0, mixto: 0, ruta: 0 }
+            };
+          }
+        }
+      }
+
+      state.litrosActuales = litros;
+      state.kmParcialDesdeCarga = kmParcial;
+      if (odo !== null) state.odometroActual = odo;
+      state.ultimaCargaOdometro = ultCargaOdo;
+      state.ultimaCargaTipo = ultCargaTipo;
+      state.cicloLleno = ciclo;
     }
 
     // ==================== TEMA ====================
@@ -663,7 +743,6 @@
           : 'px-2.5 py-1 rounded-lg font-semibold text-[11px] text-gray-600 dark:text-gray-400 transition';
       });
 
-      // Aguja y Arco
       const angle = -90 + (pct / 100) * 180;
       document.getElementById('gaugeNeedle').style.transform = `rotate(${angle}deg)`;
       const arc = document.getElementById('gaugeArc');
@@ -684,7 +763,6 @@
         arc.style.stroke = '#5b826e';
       }
 
-      // Estado del ciclo entre tanques llenos
       const txtCiclo = document.getElementById('textoCicloActual');
       if (state.cicloLleno && state.cicloLleno.odometroInicioLleno) {
         const kmRecorridosCiclo = state.odometroActual
@@ -696,7 +774,6 @@
         txtCiclo.innerText = 'Registrá un Tanque Lleno para iniciar medición exacta';
       }
 
-      // KPIs
       const odoText = state.odometroActual ? `${Math.round(state.odometroActual).toLocaleString('es-AR')} km` : 'Sin cargar';
       document.getElementById('headerOdometro').innerText = odoText;
       document.getElementById('kpiOdometro').innerText = odoText;
@@ -711,7 +788,6 @@
         : '--- km';
       document.getElementById('kpiUltimaCargaTipo').innerText = state.ultimaCargaTipo || 'Registrar carga →';
 
-      // Inputs Consumos
       document.getElementById('inputConsumoCalle').value = state.consumos.calle;
       document.getElementById('inputConsumoMixto').value = state.consumos.mixto;
       document.getElementById('inputConsumoRuta').value = state.consumos.ruta;
@@ -743,17 +819,33 @@
       if (activeNav) activeNav.className = 'flex flex-col items-center justify-center text-clio-500';
     }
 
-    // ==================== MODAL VIAJE (+) ====================
-    function abrirModalViaje() {
-      bufferViajeKm = '0';
-      estiloViajeSeleccionado = 'calle';
-      document.getElementById('inputNotaViaje').value = '';
-      seleccionarEstiloViaje('calle');
+    // ==================== MODAL VIAJE (NUEVO O EDITAR) ====================
+    function abrirModalViaje(idEditar = null) {
+      editandoViajeId = idEditar;
+
+      if (idEditar !== null) {
+        const item = state.historial.find(x => x.id === idEditar);
+        if (!item) return;
+        document.getElementById('tituloModalViaje').innerText = 'Editar Recorrido';
+        document.getElementById('btnConfirmarViaje').innerText = 'Guardar Cambios';
+        bufferViajeKm = String(item.km);
+        estiloViajeSeleccionado = item.estilo || 'calle';
+        document.getElementById('inputNotaViaje').value = item.notaPersonalizada || item.nota || '';
+      } else {
+        document.getElementById('tituloModalViaje').innerText = 'Nuevo Recorrido';
+        document.getElementById('btnConfirmarViaje').innerText = 'Descontar Recorrido';
+        bufferViajeKm = '0';
+        estiloViajeSeleccionado = 'calle';
+        document.getElementById('inputNotaViaje').value = '';
+      }
+
+      seleccionarEstiloViaje(estiloViajeSeleccionado);
       actualizarDisplayViaje();
       document.getElementById('modalViaje').classList.remove('hidden');
     }
 
     function cerrarModalViaje() {
+      editandoViajeId = null;
       document.getElementById('modalViaje').classList.add('hidden');
     }
 
@@ -798,48 +890,70 @@
 
       const consumo = state.consumos[estiloViajeSeleccionado];
       const litrosGastados = (km * consumo) / 100;
-      const nota = document.getElementById('inputNotaViaje').value.trim();
+      const notaRaw = document.getElementById('inputNotaViaje').value.trim();
 
-      state.litrosActuales = Math.max(0, state.litrosActuales - litrosGastados);
-      state.kmParcialDesdeCarga += km;
-      if (state.odometroActual !== null) {
-        state.odometroActual = Number(state.odometroActual) + km;
+      if (editandoViajeId !== null) {
+        const item = state.historial.find(x => x.id === editandoViajeId);
+        if (item) {
+          item.km = km;
+          item.estilo = estiloViajeSeleccionado;
+          item.litros = litrosGastados;
+          item.notaPersonalizada = notaRaw;
+          item.nota = notaRaw || `Recorrido en ${estiloViajeSeleccionado}`;
+        }
+        recalcularEstadoDesdeHistorial();
+      } else {
+        state.historial.unshift({
+          id: Date.now(),
+          tipo: 'viaje',
+          km: km,
+          litros: litrosGastados,
+          estilo: estiloViajeSeleccionado,
+          notaPersonalizada: notaRaw,
+          nota: notaRaw || `Recorrido en ${estiloViajeSeleccionado}`,
+          odometro: state.odometroActual ? Math.round(Number(state.odometroActual) + km) : null,
+          fecha: new Date().toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+        });
+        recalcularEstadoDesdeHistorial();
       }
-
-      // Acumular km por estilo en el ciclo actual para verificar si hubo un mismo tipo de uso
-      if (state.cicloLleno && state.cicloLleno.kmPorEstilo) {
-        state.cicloLleno.kmPorEstilo[estiloViajeSeleccionado] =
-          (state.cicloLleno.kmPorEstilo[estiloViajeSeleccionado] || 0) + km;
-      }
-
-      state.historial.unshift({
-        id: Date.now(),
-        tipo: 'viaje',
-        km: km,
-        litros: litrosGastados,
-        estilo: estiloViajeSeleccionado,
-        nota: nota || `Recorrido en ${estiloViajeSeleccionado}`,
-        odometro: state.odometroActual ? Math.round(state.odometroActual) : null,
-        fecha: new Date().toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
-      });
 
       saveState();
       cerrarModalViaje();
     }
 
-    // ==================== MODAL CARGA Y CÁLCULO DE CONSUMO REAL ====================
-    function abrirModalCarga() {
-      document.getElementById('checkPrimerLleno').checked = false;
-      document.getElementById('inputLitrosCarga').disabled = false;
-      const faltanteEstimado = Math.max(0, state.capacidadTanque - state.litrosActuales);
-      document.getElementById('inputLitrosCarga').value = faltanteEstimado > 0.5 ? faltanteEstimado.toFixed(1) : '';
-      document.getElementById('sugerenciaLitros').innerText = faltanteEstimado > 0 ? `Estimado: ~${faltanteEstimado.toFixed(1)}L` : '';
-      document.getElementById('inputOdometroCarga').value = state.odometroActual ? Math.round(state.odometroActual) : '';
-      setTipoCarga('lleno');
+    // ==================== MODAL CARGA DE NAFTA (NUEVA O EDITAR) ====================
+    function abrirModalCarga(idEditar = null) {
+      editandoCargaId = idEditar;
+
+      if (idEditar !== null) {
+        const item = state.historial.find(x => x.id === idEditar);
+        if (!item) return;
+        document.getElementById('tituloModalCarga').innerHTML = `<i class="fa-solid fa-pen text-clio-500"></i> Editar Carga de Nafta`;
+        document.getElementById('btnConfirmarCarga').innerText = 'Guardar Cambios';
+        setTipoCarga(item.subtipo || 'lleno');
+        const esPrimer = Boolean(item.esPrimerLleno);
+        document.getElementById('checkPrimerLleno').checked = esPrimer;
+        document.getElementById('inputLitrosCarga').disabled = esPrimer;
+        document.getElementById('inputLitrosCarga').value = esPrimer ? '' : (item.litros || '');
+        document.getElementById('inputOdometroCarga').value = item.odometro || '';
+        document.getElementById('sugerenciaLitros').innerText = '';
+      } else {
+        document.getElementById('tituloModalCarga').innerHTML = `<i class="fa-solid fa-gas-pump text-clio-500"></i> Cargar Combustible`;
+        document.getElementById('btnConfirmarCarga').innerText = 'Registrar Carga';
+        document.getElementById('checkPrimerLleno').checked = false;
+        document.getElementById('inputLitrosCarga').disabled = false;
+        const faltanteEstimado = Math.max(0, state.capacidadTanque - state.litrosActuales);
+        document.getElementById('inputLitrosCarga').value = faltanteEstimado > 0.5 ? faltanteEstimado.toFixed(1) : '';
+        document.getElementById('sugerenciaLitros').innerText = faltanteEstimado > 0 ? `Estimado: ~${faltanteEstimado.toFixed(1)}L` : '';
+        document.getElementById('inputOdometroCarga').value = state.odometroActual ? Math.round(state.odometroActual) : '';
+        setTipoCarga('lleno');
+      }
+
       document.getElementById('modalCarga').classList.remove('hidden');
     }
 
     function cerrarModalCarga() {
+      editandoCargaId = null;
       document.getElementById('modalCarga').classList.add('hidden');
     }
 
@@ -865,7 +979,6 @@
         chkWrapper.classList.remove('hidden');
         labelLitros.innerText = '¿Cuántos litros entraron hasta llenar?';
 
-        // Mostrar resumen del ciclo previo si existe
         const preview = document.getElementById('previewCicloInfo');
         if (state.cicloLleno && state.cicloLleno.odometroInicioLleno) {
           const parc = state.cicloLleno.litrosParcialesAcumulados || 0;
@@ -883,14 +996,13 @@
       }
     }
 
-    // Detecta si hubo un mismo tipo de uso predominante (>= 85% de los km cargados)
     function detectarEstiloUnico() {
       const modoManual = document.getElementById('selectUsoCiclo').value;
       if (modoManual !== 'auto') return modoManual;
 
       const k = state.cicloLleno?.kmPorEstilo || { calle: 0, mixto: 0, ruta: 0 };
       const total = k.calle + k.mixto + k.ruta;
-      if (total <= 0) return 'calle'; // Por defecto calle si no cargó viajes intermedios
+      if (total <= 0) return 'calle';
 
       if (k.calle / total >= 0.85) return 'calle';
       if (k.mixto / total >= 0.85) return 'mixto';
@@ -905,113 +1017,70 @@
         return;
       }
 
-      const esPrimerLleno = document.getElementById('checkPrimerLleno').checked;
+      const esPrimerLleno = tipoCargaSeleccionado === 'lleno' && document.getElementById('checkPrimerLleno').checked;
       const litrosInput = parseFloat(document.getElementById('inputLitrosCarga').value);
 
-      if (tipoCargaSeleccionado === 'parcial') {
-        if (isNaN(litrosInput) || litrosInput <= 0) {
-          alert('Ingresá cuántos litros parciales cargaste.');
-          return;
-        }
-        // Sumamos al tanque y acumulamos en el ciclo entre tanques llenos
-        state.litrosActuales = Math.min(state.capacidadTanque, state.litrosActuales + litrosInput);
-        state.cicloLleno.litrosParcialesAcumulados = (state.cicloLleno.litrosParcialesAcumulados || 0) + litrosInput;
-        state.ultimaCargaTipo = `Parcial (+${litrosInput.toFixed(1)}L)`;
-        state.kmParcialDesdeCarga = 0;
-        state.odometroActual = odoInput;
-        state.ultimaCargaOdometro = odoInput;
-
-        state.historial.unshift({
-          id: Date.now(),
-          tipo: 'carga',
-          subtipo: 'parcial',
-          litros: litrosInput,
-          odometro: odoInput,
-          nota: `Carga Parcial (+${litrosInput.toFixed(1)}L) · Acumulado ciclo: ${state.cicloLleno.litrosParcialesAcumulados.toFixed(1)}L`,
-          fecha: new Date().toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
-        });
-
-        saveState();
-        cerrarModalCarga();
-        return;
-      }
-
-      // --- CASO TANQUE LLENO ---
       if (!esPrimerLleno && (isNaN(litrosInput) || litrosInput <= 0)) {
-        alert('Ingresá cuántos litros entraron en el surtidor (o marcá la casilla de primer llenado).');
+        alert('Ingresá cuántos litros entraron en el surtidor.');
         return;
       }
 
-      const odoInicio = state.cicloLleno?.odometroInicioLleno;
-      const litrosParciales = state.cicloLleno?.litrosParcialesAcumulados || 0;
-      let verificacionCalculada = null;
+      const estiloCicloElegido = detectarEstiloUnico();
 
-      // Si teníamos un tanque lleno previo válido y conocemos los litros que entraron ahora:
-      if (!esPrimerLleno && odoInicio && odoInput > odoInicio) {
-        const kmTotalesCiclo = odoInput - odoInicio;
-        const litrosTotalesConsumidos = litrosParciales + litrosInput;
-        const consumoReal = (litrosTotalesConsumidos / kmTotalesCiclo) * 100;
-        const estiloDominante = detectarEstiloUnico();
-
-        verificacionCalculada = {
-          kmTotalesCiclo,
-          litrosParciales,
-          litrosUltimoLlenado: litrosInput,
-          litrosTotalesConsumidos,
-          consumoReal: Number(consumoReal.toFixed(2)),
-          estiloDominante
-        };
+      if (editandoCargaId !== null) {
+        // Editando una carga existente
+        const item = state.historial.find(x => x.id === editandoCargaId);
+        if (item) {
+          item.subtipo = tipoCargaSeleccionado;
+          item.esPrimerLleno = esPrimerLleno;
+          item.litros = esPrimerLleno ? 0 : litrosInput;
+          item.odometro = odoInput;
+          item.estiloCiclo = estiloCicloElegido;
+        }
+        recalcularEstadoDesdeHistorial();
+        saveState();
+        const verifActualizada = item?.verificacion;
+        cerrarModalCarga();
+        if (verifActualizada) mostrarResultadoVerificacion(verifActualizada);
+        return;
       }
 
-      // Reiniciar tanque a 50L y abrir nuevo ciclo limpio desde este odómetro
-      state.litrosActuales = state.capacidadTanque;
-      state.kmParcialDesdeCarga = 0;
-      state.odometroActual = odoInput;
-      state.ultimaCargaOdometro = odoInput;
-      state.ultimaCargaTipo = esPrimerLleno ? 'Tanque Lleno (Inicio)' : `Lleno (+${litrosInput.toFixed(1)}L)`;
-
-      state.cicloLleno = {
-        activo: true,
-        odometroInicioLleno: odoInput,
-        litrosParcialesAcumulados: 0.0,
-        kmPorEstilo: { calle: 0, mixto: 0, ruta: 0 }
-      };
-
-      state.historial.unshift({
+      // Nueva carga
+      const nuevoItem = {
         id: Date.now(),
         tipo: 'carga',
-        subtipo: 'lleno',
+        subtipo: tipoCargaSeleccionado,
+        esPrimerLleno: esPrimerLleno,
         litros: esPrimerLleno ? 0 : litrosInput,
         odometro: odoInput,
-        verificacion: verificacionCalculada,
-        nota: verificacionCalculada
-          ? `Tanque Lleno (+${litrosInput.toFixed(1)}L) · Medido: ${verificacionCalculada.consumoReal} L/100`
-          : `Tanque Lleno (Base de ciclo fijada)`,
+        estiloCiclo: estiloCicloElegido,
+        verificacion: null,
+        nota: '',
         fecha: new Date().toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
-      });
+      };
 
+      state.historial.unshift(nuevoItem);
+      recalcularEstadoDesdeHistorial();
       saveState();
       cerrarModalCarga();
 
-      // Si se pudo calcular el consumo real entre llenos, mostrar modal con el desglose
-      if (verificacionCalculada) {
-        mostrarResultadoVerificacion(verificacionCalculada);
+      if (nuevoItem.verificacion) {
+        mostrarResultadoVerificacion(nuevoItem.verificacion);
       }
     }
 
     function mostrarResultadoVerificacion(v) {
       const kmL = (100 / v.consumoReal).toFixed(1);
       document.getElementById('resumenMatematicoCiclo').innerText =
-        `Recorriste ${v.kmTotalesCiclo} km con ${v.litrosTotalesConsumidos.toFixed(1)} L totales (${v.litrosParciales > 0 ? `${v.litrosParciales.toFixed(1)}L parciales + ` : ''}${v.litrosUltimoLlenado.toFixed(1)}L de hoy).`;
+        `Recorriste ${v.kmTotalesCiclo} km con ${v.litrosTotalesConsumidos.toFixed(1)} L totales (${v.litrosParciales > 0 ? `${v.litrosParciales.toFixed(1)}L parciales + ` : ''}${v.litrosUltimoLlenado.toFixed(1)}L del llenado).`;
       document.getElementById('valorConsumoReal').innerText = `${v.consumoReal.toFixed(1)} L/100km`;
       document.getElementById('valorRendimientoReal').innerText = `${kmL} km por litro`;
 
-      const bloqueAct = document.getElementById('bloqueActualizacionPromedio');
       const txtComp = document.getElementById('textoComparacionPromedio');
       const btnAplicar = document.getElementById('btnAplicarNuevoConsumo');
 
       if (v.estiloDominante === 'combinado') {
-        txtComp.innerText = 'Como este tanque combinó distintos estilos de manejo (Calle y Ruta mezclados), te mostramos el promedio real pero no modificamos tus valores puros.';
+        txtComp.innerText = 'Como este tanque combinó distintos estilos de manejo, te mostramos el promedio real pero no modificamos tus valores puros.';
         btnAplicar.classList.add('hidden');
       } else {
         const nombreEstilo = v.estiloDominante.charAt(0).toUpperCase() + v.estiloDominante.slice(1);
@@ -1021,6 +1090,7 @@
         btnAplicar.innerText = `Actualizar consumo ${nombreEstilo} a ${v.consumoReal.toFixed(1)} L/100`;
         btnAplicar.onclick = () => {
           state.consumos[v.estiloDominante] = Number(v.consumoReal.toFixed(1));
+          recalcularEstadoDesdeHistorial();
           saveState();
           cerrarModalResultadoConsumo();
         };
@@ -1045,6 +1115,7 @@
         alert('Ingresá un kilometraje válido del tablero.');
         return;
       }
+      state.odometroBaseInicial = val;
       state.odometroActual = val;
       if (!state.ultimaCargaOdometro) state.ultimaCargaOdometro = val;
       if (!state.cicloLleno.odometroInicioLleno) state.cicloLleno.odometroInicioLleno = val;
@@ -1052,7 +1123,7 @@
       saveState();
     }
 
-    // ==================== HISTORIAL ====================
+    // ==================== HISTORIAL (CON EDITAR Y BORRAR PARA VIAJES Y CARGAS) ====================
     function renderHistorial() {
       const recientesContainer = document.getElementById('listaRecientes');
       const completoContainer = document.getElementById('listaHistorialCompleto');
@@ -1074,41 +1145,53 @@
           };
           return `
             <div class="flex items-center justify-between p-2.5 rounded-xl bg-gray-50 dark:bg-[#141917] border border-gray-200/50 dark:border-white/5">
-              <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl flex items-center justify-center ${iconMap[item.estilo] || iconMap.calle}">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <div class="w-9 h-9 rounded-xl shrink-0 flex items-center justify-center ${iconMap[item.estilo] || iconMap.calle}">
                   <i class="fa-solid ${iconMap[item.estilo]?.split(' ')[0]} text-xs"></i>
                 </div>
-                <div>
-                  <div class="text-xs font-bold text-gray-900 dark:text-white">${item.nota}</div>
-                  <div class="text-[10px] text-gray-400">${item.fecha} ${item.odometro ? `· Tablero: ${item.odometro.toLocaleString('es-AR')} km` : ''}</div>
+                <div class="min-w-0">
+                  <div class="text-xs font-bold text-gray-900 dark:text-white truncate">${item.nota}</div>
+                  <div class="text-[10px] text-gray-400">${item.fecha} ${item.odometro ? `· ${item.odometro.toLocaleString('es-AR')} km` : ''}</div>
                 </div>
               </div>
-              <div class="flex items-center gap-2.5">
-                <div class="text-right">
+              <div class="flex items-center gap-1.5 shrink-0 ml-2">
+                <div class="text-right mr-1">
                   <div class="text-xs font-extrabold text-gray-900 dark:text-white">-${item.km} km</div>
                   <div class="text-[10px] font-semibold text-red-400">-${item.litros.toFixed(1)} L</div>
                 </div>
-                <button onclick="eliminarMovimiento(${item.id})" class="text-gray-400 hover:text-red-500 text-xs px-1">
-                  <i class="fa-solid fa-trash-can"></i>
+                <button onclick="abrirModalViaje(${item.id})" title="Editar viaje" class="w-7 h-7 rounded-lg bg-gray-200/70 dark:bg-white/5 text-gray-500 dark:text-gray-300 hover:text-clio-400 flex items-center justify-center text-xs active:scale-90 transition">
+                  <i class="fa-solid fa-pen text-[10px]"></i>
+                </button>
+                <button onclick="eliminarMovimiento(${item.id})" title="Borrar viaje" class="w-7 h-7 rounded-lg bg-red-500/10 text-red-400 hover:text-red-500 flex items-center justify-center text-xs active:scale-90 transition">
+                  <i class="fa-solid fa-trash-can text-[10px]"></i>
                 </button>
               </div>
             </div>
           `;
         } else {
+          // Ítem de Carga de Combustible (También con Editar y Borrar)
           return `
             <div class="flex items-center justify-between p-2.5 rounded-xl bg-clio-500/10 border border-clio-500/30">
-              <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl bg-clio-500 text-white flex items-center justify-center">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <div class="w-9 h-9 rounded-xl shrink-0 bg-clio-500 text-white flex items-center justify-center">
                   <i class="fa-solid fa-gas-pump text-xs"></i>
                 </div>
-                <div>
-                  <div class="text-xs font-bold text-gray-900 dark:text-white">${item.nota}</div>
+                <div class="min-w-0">
+                  <div class="text-xs font-bold text-gray-900 dark:text-white truncate">${item.nota}</div>
                   <div class="text-[10px] text-clio-600 dark:text-clio-300 font-semibold">${item.fecha} · Tablero: ${Number(item.odometro).toLocaleString('es-AR')} km</div>
                 </div>
               </div>
-              <div class="text-right">
-                <div class="text-xs font-extrabold text-emerald-600 dark:text-emerald-400">${item.litros > 0 ? `+${item.litros.toFixed(1)} L` : '50.0 L'}</div>
-                <div class="text-[10px] text-gray-400">${item.subtipo === 'lleno' ? 'Corte lleno' : 'Parcial'}</div>
+              <div class="flex items-center gap-1.5 shrink-0 ml-2">
+                <div class="text-right mr-1">
+                  <div class="text-xs font-extrabold text-emerald-600 dark:text-emerald-400">${item.litros > 0 ? `+${Number(item.litros).toFixed(1)} L` : '50.0 L'}</div>
+                  <div class="text-[10px] text-gray-400">${item.subtipo === 'lleno' ? 'Corte lleno' : 'Parcial'}</div>
+                </div>
+                <button onclick="abrirModalCarga(${item.id})" title="Editar carga" class="w-7 h-7 rounded-lg bg-white/60 dark:bg-white/10 text-clio-700 dark:text-clio-200 hover:text-clio-400 flex items-center justify-center text-xs active:scale-90 transition">
+                  <i class="fa-solid fa-pen text-[10px]"></i>
+                </button>
+                <button onclick="eliminarMovimiento(${item.id})" title="Borrar carga" class="w-7 h-7 rounded-lg bg-red-500/15 text-red-400 hover:text-red-500 flex items-center justify-center text-xs active:scale-90 transition">
+                  <i class="fa-solid fa-trash-can text-[10px]"></i>
+                </button>
               </div>
             </div>
           `;
@@ -1123,17 +1206,14 @@
       const idx = state.historial.findIndex(x => x.id === id);
       if (idx === -1) return;
       const item = state.historial[idx];
-      if (!confirm('¿Deshacer este recorrido y devolver los litros al tanque?')) return;
+      const msg = item.tipo === 'viaje'
+        ? '¿Borrar este viaje y devolver los kilómetros/litros al tanque?'
+        : '¿Borrar esta carga de combustible y recalcular el tanque?';
 
-      if (item.tipo === 'viaje') {
-        state.litrosActuales = Math.min(state.capacidadTanque, state.litrosActuales + item.litros);
-        state.kmParcialDesdeCarga = Math.max(0, state.kmParcialDesdeCarga - item.km);
-        if (state.odometroActual) state.odometroActual -= item.km;
-        if (state.cicloLleno?.kmPorEstilo && state.cicloLleno.kmPorEstilo[item.estilo]) {
-          state.cicloLleno.kmPorEstilo[item.estilo] = Math.max(0, state.cicloLleno.kmPorEstilo[item.estilo] - item.km);
-        }
-      }
+      if (!confirm(msg)) return;
+
       state.historial.splice(idx, 1);
+      recalcularEstadoDesdeHistorial();
       saveState();
     }
 
@@ -1149,6 +1229,7 @@
       if (cRuta > 0) state.consumos.ruta = cRuta;
       if (cap > 0) state.capacidadTanque = cap;
 
+      recalcularEstadoDesdeHistorial();
       saveState();
       irASeccion('tablero');
     }

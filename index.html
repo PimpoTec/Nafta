@@ -21,7 +21,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <!-- Leaflet Maps CSS & JS -->
+  <!-- Leaflet Maps CSS & JS (100% Free OpenStreetMap) -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -74,11 +74,15 @@
     .numpad-btn:active {
       transform: scale(0.94);
     }
-    /* Estilo del mapa Leaflet */
-    #mapLive {
+    /* Mapas Leaflet con OpenStreetMap libre (sin API Key) y Modo Oscuro por CSS */
+    #mapLive, #mapSavedTrip {
       height: 300px;
       width: 100%;
       z-index: 10;
+      background: #181e1b;
+    }
+    html.dark .leaflet-tile-pane {
+      filter: invert(100%) hue-rotate(180deg) brightness(92%) contrast(88%);
     }
     .leaflet-control-attribution {
       display: none !important;
@@ -90,6 +94,34 @@
       background: #5b826e;
       border: 3px solid #ffffff;
       box-shadow: 0 0 0 6px rgba(91, 130, 110, 0.35);
+    }
+    .pin-start {
+      width: 22px;
+      height: 22px;
+      border-radius: 9999px;
+      background: #10b981;
+      color: #fff;
+      font-weight: 800;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    }
+    .pin-end {
+      width: 22px;
+      height: 22px;
+      border-radius: 9999px;
+      background: #ef4444;
+      color: #fff;
+      font-weight: 800;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
     }
   </style>
 </head>
@@ -200,9 +232,9 @@
           <div>
             <div class="text-sm font-extrabold flex items-center gap-2">
               Trayecto en Vivo con GPS
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/20">NUEVO</span>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/20">MAPA LIBRE</span>
             </div>
-            <p class="text-[11px] text-clio-100 mt-0.5">Dibuja el mapa, detecta km, velocidades y carga solo</p>
+            <p class="text-[11px] text-clio-100 mt-0.5">Graba el mapa del recorrido, detecta km y uso solo</p>
           </div>
         </div>
         <i class="fa-solid fa-chevron-right text-sm opacity-80"></i>
@@ -284,7 +316,7 @@
             <h2 class="text-base font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
               <i class="fa-solid fa-satellite-dish text-clio-500"></i> Trayecto en Vivo
             </h2>
-            <p id="gpsStatusText" class="text-[11px] text-gray-500 dark:text-gray-400">Listo para iniciar seguimiento satelital</p>
+            <p id="gpsStatusText" class="text-[11px] text-gray-500 dark:text-gray-400">El recorrido quedará guardado para verlo luego</p>
           </div>
 
           <button onclick="toggleSimulacionGps()" id="btnSimularGps" class="text-[11px] font-bold px-2.5 py-1.5 rounded-xl bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300 active:scale-95 transition">
@@ -292,14 +324,14 @@
           </button>
         </div>
 
-        <!-- MAPA INTERACTIVO -->
+        <!-- MAPA INTERACTIVO LIBRE DE API KEY -->
         <div class="relative rounded-2xl overflow-hidden border border-gray-200 dark:border-white/10">
           <div id="mapLive"></div>
           <!-- Overlay de calle actual y velocidad -->
           <div class="absolute bottom-2.5 left-2.5 right-2.5 z-20 bg-black/75 backdrop-blur-md text-white px-3 py-2 rounded-xl flex items-center justify-between text-xs">
             <div class="truncate pr-2">
               <span class="text-[10px] text-gray-300 block">Ubicación / Vía detectada</span>
-              <strong id="liveStreetName" class="text-xs font-bold truncate block">Esperando señal GPS...</strong>
+              <strong id="liveStreetName" class="text-xs font-bold truncate block">Mapa listo (OpenStreetMap)</strong>
             </div>
             <div class="text-right shrink-0 pl-2 border-l border-white/15">
               <span id="liveSpeedVal" class="text-lg font-black text-clio-300">0</span>
@@ -346,7 +378,7 @@
               Descartar
             </button>
             <button onclick="finalizarYGuardarViajeEnVivo()" class="py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs shadow-lg flex items-center justify-center gap-1.5 active:scale-95 transition">
-              <i class="fa-solid fa-flag-checkered"></i> Finalizar y Cargar
+              <i class="fa-solid fa-flag-checkered"></i> Finalizar y Guardar Mapa
             </button>
           </div>
         </div>
@@ -361,7 +393,7 @@
         <div class="flex items-center justify-between mb-3">
           <div>
             <h2 class="text-base font-extrabold text-gray-900 dark:text-white">Bitácora de Viajes y Cargas</h2>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Podés editar (<i class="fa-solid fa-pen text-[10px]"></i>) o borrar (<i class="fa-solid fa-trash-can text-[10px]"></i>) cualquier ítem</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Tocá <i class="fa-solid fa-map-location-dot text-clio-500"></i> para ver el mapa del recorrido guardado</p>
           </div>
           <span id="contadorMovimientos" class="text-xs font-bold px-2.5 py-1 rounded-lg bg-clio-500/10 text-clio-600 dark:text-clio-300">0 reg.</span>
         </div>
@@ -469,7 +501,7 @@
     <i class="fa-solid fa-plus"></i>
   </button>
 
-  <!-- BARRA DE NAVEGACIÓN INFERIOR (5 ÍTEMS CON "EN VIVO") -->
+  <!-- BARRA DE NAVEGACIÓN INFERIOR -->
   <nav class="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-[#181e1b]/95 backdrop-blur-lg border-t border-gray-200 dark:border-white/10 z-40 safe-bottom">
     <div class="max-w-md mx-auto grid grid-cols-5 items-center h-16 px-1">
       <button onclick="irASeccion('tablero')" id="nav-tablero" class="flex flex-col items-center justify-center text-clio-500">
@@ -638,7 +670,50 @@
   </div>
 
   <!-- =======================================================================
-       MODAL 3: RESULTADO DE VERIFICACIÓN DE CONSUMO REAL
+       MODAL 3: VISOR DE MAPA DE RECORRIDO GUARDADO
+       ======================================================================= -->
+  <div id="modalVerMapaViaje" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-[#f4f6f4] dark:bg-[#181e1b] w-full max-w-sm rounded-3xl p-4 shadow-2xl border border-white/10 space-y-3.5">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 id="savedMapTitle" class="text-sm font-extrabold text-gray-900 dark:text-white truncate max-w-[240px]">Recorrido GPS</h3>
+          <p id="savedMapDate" class="text-[11px] text-gray-500 dark:text-gray-400"></p>
+        </div>
+        <button onclick="cerrarModalMapaGuardado()" class="w-8 h-8 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <div class="rounded-2xl overflow-hidden border border-gray-200 dark:border-white/10 relative">
+        <div id="mapSavedTrip"></div>
+      </div>
+
+      <!-- Resumen del trayecto guardado -->
+      <div class="grid grid-cols-3 gap-2 text-center">
+        <div class="bg-white dark:bg-[#121614] p-2.5 rounded-xl border border-gray-200/60 dark:border-white/5">
+          <span class="text-[10px] text-gray-400 block uppercase font-bold">Distancia</span>
+          <strong id="savedMapKm" class="text-sm font-extrabold text-gray-900 dark:text-white">0 km</strong>
+        </div>
+        <div class="bg-white dark:bg-[#121614] p-2.5 rounded-xl border border-gray-200/60 dark:border-white/5">
+          <span class="text-[10px] text-gray-400 block uppercase font-bold">Uso / Vía</span>
+          <strong id="savedMapStyle" class="text-sm font-extrabold text-clio-500">Calle</strong>
+        </div>
+        <div class="bg-white dark:bg-[#121614] p-2.5 rounded-xl border border-gray-200/60 dark:border-white/5">
+          <span class="text-[10px] text-gray-400 block uppercase font-bold">Combustible</span>
+          <strong id="savedMapLitros" class="text-sm font-extrabold text-red-400">-0.0 L</strong>
+        </div>
+      </div>
+
+      <div id="savedMapCallesInfo" class="text-[11px] text-gray-500 dark:text-gray-400 bg-white dark:bg-[#121614] px-3 py-2 rounded-xl border border-gray-200/60 dark:border-white/5"></div>
+
+      <button onclick="cerrarModalMapaGuardado()" class="w-full py-3 rounded-2xl bg-clio-500 text-white font-extrabold text-xs">
+        Cerrar Mapa
+      </button>
+    </div>
+  </div>
+
+  <!-- =======================================================================
+       MODAL 4: RESULTADO DE VERIFICACIÓN DE CONSUMO REAL
        ======================================================================= -->
   <div id="modalResultadoConsumo" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white dark:bg-[#181e1b] w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-clio-500/40 space-y-4 text-center">
@@ -671,7 +746,7 @@
   </div>
 
   <!-- =======================================================================
-       MODAL 4: PEDIR ODÓMETRO INICIAL AL ENTRAR
+       MODAL 5: PEDIR ODÓMETRO INICIAL AL ENTRAR
        ======================================================================= -->
   <div id="modalOdometroInicial" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white dark:bg-[#181e1b] w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-clio-500/30 space-y-4 text-center">
@@ -696,6 +771,8 @@
   <!-- LÓGICA DE LA APLICACIÓN -->
   <script>
     const STORAGE_KEY = 'miclio_v3_data';
+    // Servidor oficial de OpenStreetMap (100% gratuito y sin API Key)
+    const OSM_TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 
     const defaultData = {
       theme: 'dark',
@@ -727,7 +804,6 @@
       state.odometroBaseInicial = state.odometroActual;
     }
 
-    // Estado de edición
     let bufferViajeKm = '0';
     let estiloViajeSeleccionado = 'calle';
     let tipoCargaSeleccionado = 'lleno';
@@ -829,13 +905,6 @@
       } else {
         html.classList.remove('dark');
         icon.className = 'fa-solid fa-moon text-sm text-clio-700';
-      }
-      if (liveMapTileLayer) {
-        liveMapTileLayer.setUrl(
-          state.theme === 'dark'
-            ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-            : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
-        );
       }
     }
 
@@ -953,14 +1022,16 @@
       }
     }
 
-    // ==================== TRAYECTO EN VIVO (GPS + MAPA + DETECCIÓN AUTOMÁTICA) ====================
+    // ==================== TRAYECTO EN VIVO (GPS + GUARDADO DE RUTA) ====================
     let liveMap = null;
-    let liveMapTileLayer = null;
     let livePolyline = null;
     let liveMarker = null;
     let liveWatchId = null;
     let liveSimInterval = null;
     let wakeLockObj = null;
+
+    let savedTripMap = null;
+    let savedTripLayerGroup = null;
 
     let liveTrip = {
       active: false,
@@ -968,7 +1039,7 @@
       timerInterval: null,
       coords: [],
       totalKm: 0,
-      fastKm: 0, // km recorridos a > 70 km/h (autopista/ruta)
+      fastKm: 0,
       currentSpeedKmh: 0,
       startStreet: '',
       endStreet: '',
@@ -977,15 +1048,10 @@
 
     function initLiveMap() {
       if (liveMap) return;
-      // Coordenadas iniciales por defecto (Zona Norte GBA / Villa Adelina - Ballester)
       const defaultLatLng = [-34.535, -58.545];
       liveMap = L.map('mapLive', { zoomControl: false }).setView(defaultLatLng, 14);
 
-      const tileUrl = state.theme === 'dark'
-        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-        : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
-
-      liveMapTileLayer = L.tileLayer(tileUrl, { maxZoom: 19 }).addTo(liveMap);
+      L.tileLayer(OSM_TILE_URL, { maxZoom: 19 }).addTo(liveMap);
 
       const icon = L.divIcon({
         className: 'clio-gps-marker',
@@ -994,9 +1060,8 @@
       });
 
       liveMarker = L.marker(defaultLatLng, { icon }).addTo(liveMap);
-      livePolyline = L.polyline([], { color: '#5b826e', weight: 5, opacity: 0.9 }).addTo(liveMap);
+      livePolyline = L.polyline([], { color: '#5b826e', weight: 5, opacity: 0.95 }).addTo(liveMap);
 
-      // Centrar en ubicación real apenas abre la pestaña
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(pos => {
           const latlng = [pos.coords.latitude, pos.coords.longitude];
@@ -1007,7 +1072,6 @@
       }
     }
 
-    // Fórmula Haversine para calcular distancia entre dos puntos GPS en km
     function calcularDistanciaHaversine(lat1, lon1, lat2, lon2) {
       const R = 6371;
       const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -1019,7 +1083,6 @@
       return R * c;
     }
 
-    // Reverse Geocoding gratuito con Nominatim (OpenStreetMap)
     async function obtenerNombreCalle(lat, lon, esInicio = false) {
       try {
         const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`, {
@@ -1071,16 +1134,15 @@
       document.getElementById('btnStartLive').classList.add('hidden');
       document.getElementById('controlesViajeActivo').classList.remove('hidden');
       document.getElementById('badgeGpsHeader').classList.remove('hidden');
-      document.getElementById('gpsStatusText').innerText = 'Grabando trazado GPS en tiempo real...';
+      document.getElementById('gpsStatusText').innerText = 'Grabando recorrido GPS en vivo...';
 
       activarWakeLock();
-
       liveTrip.timerInterval = setInterval(actualizarCronometroVivo, 1000);
 
       if (navigator.geolocation) {
         liveWatchId = navigator.geolocation.watchPosition(
           procesarPuntoGps,
-          err => {
+          () => {
             document.getElementById('gpsStatusText').innerText = 'Señal GPS débil. Asegurate de dar permiso de ubicación.';
           },
           { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 }
@@ -1096,7 +1158,6 @@
       const lon = pos.coords.longitude;
       const accuracy = pos.coords.accuracy || 10;
 
-      // Ignorar rebotes muy imprecisos (> 65m)
       if (accuracy > 65 && liveTrip.coords.length > 0) return;
 
       const now = Date.now();
@@ -1109,7 +1170,6 @@
         const distKm = calcularDistanciaHaversine(prev.lat, prev.lon, lat, lon);
         const dtHours = (now - prev.time) / 3600000;
 
-        // Filtro anti-ruido: ignorar micro-saltos menores a 8 metros
         if (distKm < 0.008) return;
 
         if (speedKmh === 0 && dtHours > 0) {
@@ -1117,7 +1177,6 @@
         }
 
         liveTrip.totalKm += distKm;
-        // Si este tramo se recorrió a más de 70 km/h, suma como tramo de autopista/ruta
         if (speedKmh >= 70) {
           liveTrip.fastKm += distKm;
         }
@@ -1126,14 +1185,13 @@
       }
 
       liveTrip.currentSpeedKmh = Math.round(speedKmh);
-      liveTrip.coords.push({ lat, lon, time: now });
+      liveTrip.coords.push({ lat: Number(lat.toFixed(5)), lon: Number(lon.toFixed(5)), time: now });
 
       const latlngs = liveTrip.coords.map(c => [c.lat, c.lon]);
       livePolyline.setLatLngs(latlngs);
       liveMarker.setLatLng([lat, lon]);
       liveMap.panTo([lat, lon]);
 
-      // Cada 12 puntos consultamos el nombre de la calle actual
       if (liveTrip.coords.length % 12 === 0) {
         obtenerNombreCalle(lat, lon, false);
       }
@@ -1223,7 +1281,6 @@
         return;
       }
 
-      // Obtener nombre de la calle final si hay coordenadas
       if (liveTrip.coords.length > 0) {
         const last = liveTrip.coords[liveTrip.coords.length - 1];
         await obtenerNombreCalle(last.lat, last.lon, false);
@@ -1233,6 +1290,7 @@
       const estiloFinal = liveTrip.detectedStyle;
       const consumo = state.consumos[estiloFinal] || state.consumos.calle;
       const litrosGastados = (kmRedondeados * consumo) / 100;
+      const pctFast = liveTrip.totalKm > 0.02 ? Math.round((liveTrip.fastKm / liveTrip.totalKm) * 100) : 0;
 
       let notaAutomatica = `GPS (${estiloFinal.toUpperCase()})`;
       if (liveTrip.startStreet && liveTrip.endStreet && liveTrip.startStreet !== liveTrip.endStreet) {
@@ -1241,10 +1299,14 @@
         notaAutomatica = `GPS por ${liveTrip.endStreet}`;
       }
 
+      // Guardamos la lista de coordenadas [lat, lon] comprimida para poder ver el mapa cuando quieras
+      const rutaGuardada = liveTrip.coords.map(c => [c.lat, c.lon]);
+
       detenerSensoresVivo();
 
+      const nuevoViajeId = Date.now();
       state.historial.unshift({
-        id: Date.now(),
+        id: nuevoViajeId,
         tipo: 'viaje',
         km: kmRedondeados,
         litros: litrosGastados,
@@ -1252,17 +1314,66 @@
         notaPersonalizada: notaAutomatica,
         nota: notaAutomatica,
         odometro: state.odometroActual ? Math.round(Number(state.odometroActual) + kmRedondeados) : null,
-        fecha: new Date().toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+        fecha: new Date().toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }),
+        rutaGps: rutaGuardada,
+        origenCalle: liveTrip.startStreet || 'Inicio GPS',
+        destinoCalle: liveTrip.endStreet || 'Llegada GPS',
+        pctAutopista: pctFast
       });
 
       recalcularEstadoDesdeHistorial();
       saveState();
 
-      document.getElementById('gpsStatusText').innerText = `¡Viaje guardado! (${kmRedondeados} km en ${estiloFinal})`;
       irASeccion('tablero');
+      // Abrir directamente el visor con el recorrido guardado para confirmar
+      verMapaViajeGuardado(nuevoViajeId);
     }
 
-    // Modo Simulación para probar en vivo cómo dibuja el trazado y detecta calle/autopista
+    // ==================== VISOR DE RECORRIDO GUARDADO ====================
+    function verMapaViajeGuardado(id) {
+      const item = state.historial.find(x => x.id === id);
+      if (!item || !item.rutaGps || item.rutaGps.length === 0) return;
+
+      document.getElementById('savedMapTitle').innerText = item.nota;
+      document.getElementById('savedMapDate').innerText = `${item.fecha} ${item.odometro ? `· Tablero: ${item.odometro.toLocaleString('es-AR')} km` : ''}`;
+      document.getElementById('savedMapKm').innerText = `${item.km} km`;
+      document.getElementById('savedMapStyle').innerText = `${item.estilo.toUpperCase()} (${item.pctAutopista || 0}% au.)`;
+      document.getElementById('savedMapLitros').innerText = `-${item.litros.toFixed(2)} L`;
+      document.getElementById('savedMapCallesInfo').innerHTML =
+        `<span class="text-emerald-500 font-bold">A:</span> ${item.origenCalle || 'Inicio'} &nbsp;→&nbsp; <span class="text-red-400 font-bold">B:</span> ${item.destinoCalle || 'Llegada'}`;
+
+      document.getElementById('modalVerMapaViaje').classList.remove('hidden');
+
+      setTimeout(() => {
+        if (!savedTripMap) {
+          savedTripMap = L.map('mapSavedTrip', { zoomControl: false });
+          L.tileLayer(OSM_TILE_URL, { maxZoom: 19 }).addTo(savedTripMap);
+          savedTripLayerGroup = L.layerGroup().addTo(savedTripMap);
+        }
+
+        savedTripMap.invalidateSize();
+        savedTripLayerGroup.clearLayers();
+
+        const poly = L.polyline(item.rutaGps, { color: '#5b826e', weight: 5, opacity: 0.95 }).addTo(savedTripLayerGroup);
+
+        const startPt = item.rutaGps[0];
+        const endPt = item.rutaGps[item.rutaGps.length - 1];
+
+        const startIcon = L.divIcon({ className: 'pin-start', html: 'A', iconSize: [22, 22], iconAnchor: [11, 11] });
+        const endIcon = L.divIcon({ className: 'pin-end', html: 'B', iconSize: [22, 22], iconAnchor: [11, 11] });
+
+        L.marker(startPt, { icon: startIcon }).addTo(savedTripLayerGroup);
+        L.marker(endPt, { icon: endIcon }).addTo(savedTripLayerGroup);
+
+        savedTripMap.fitBounds(poly.getBounds(), { padding: [28, 28] });
+      }, 120);
+    }
+
+    function cerrarModalMapaGuardado() {
+      document.getElementById('modalVerMapaViaje').classList.add('hidden');
+    }
+
+    // ==================== SIMULADOR GPS ====================
     function toggleSimulacionGps() {
       if (liveSimInterval) {
         detenerSimulacionGps();
@@ -1283,7 +1394,6 @@
 
       liveSimInterval = setInterval(() => {
         step++;
-        // Primeros pasos velocidad de calle (42 km/h), luego sube a autopista (95 km/h)
         const isHighway = step > 6;
         const speedKmh = isHighway ? 92 + Math.random() * 12 : 38 + Math.random() * 10;
         simLat += 0.0011;
@@ -1299,7 +1409,7 @@
             speed: speedKmh / 3.6
           }
         });
-      }, 1200);
+      }, 1000);
     }
 
     function detenerSimulacionGps() {
@@ -1613,7 +1723,7 @@
       saveState();
     }
 
-    // ==================== HISTORIAL ====================
+    // ==================== HISTORIAL (CON BOTÓN DE MAPA GUARDADO) ====================
     function renderHistorial() {
       const recientesContainer = document.getElementById('listaRecientes');
       const completoContainer = document.getElementById('listaHistorialCompleto');
@@ -1633,6 +1743,13 @@
             mixto: 'fa-road-circle-check text-clio-500 bg-clio-500/10',
             ruta: 'fa-highway text-emerald-500 bg-emerald-500/10'
           };
+          const tieneMapa = item.rutaGps && item.rutaGps.length > 1;
+          const btnMapaHtml = tieneMapa
+            ? `<button onclick="verMapaViajeGuardado(${item.id})" title="Ver mapa del recorrido" class="w-7 h-7 rounded-lg bg-clio-500/20 text-clio-500 hover:bg-clio-500 hover:text-white flex items-center justify-center text-xs active:scale-90 transition">
+                 <i class="fa-solid fa-map-location-dot text-[11px]"></i>
+               </button>`
+            : '';
+
           return `
             <div class="flex items-center justify-between p-2.5 rounded-xl bg-gray-50 dark:bg-[#141917] border border-gray-200/50 dark:border-white/5">
               <div class="flex items-center gap-2.5 min-w-0">
@@ -1649,6 +1766,7 @@
                   <div class="text-xs font-extrabold text-gray-900 dark:text-white">-${item.km} km</div>
                   <div class="text-[10px] font-semibold text-red-400">-${item.litros.toFixed(1)} L</div>
                 </div>
+                ${btnMapaHtml}
                 <button onclick="abrirModalViaje(${item.id})" title="Editar viaje" class="w-7 h-7 rounded-lg bg-gray-200/70 dark:bg-white/5 text-gray-500 dark:text-gray-300 hover:text-clio-400 flex items-center justify-center text-xs active:scale-90 transition">
                   <i class="fa-solid fa-pen text-[10px]"></i>
                 </button>

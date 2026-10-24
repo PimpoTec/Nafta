@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>MiClio 1.6 16v - Nafta</title>
+  <title>MiClio 1.6 16v - Nafta & GPS</title>
   
   <!-- PWA & Mobile Meta -->
   <link rel="manifest" href="./manifest.json">
@@ -20,6 +20,10 @@
   <!-- Tailwind CSS & FontAwesome -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Leaflet Maps CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
     tailwind.config = {
@@ -70,6 +74,23 @@
     .numpad-btn:active {
       transform: scale(0.94);
     }
+    /* Estilo del mapa Leaflet */
+    #mapLive {
+      height: 300px;
+      width: 100%;
+      z-index: 10;
+    }
+    .leaflet-control-attribution {
+      display: none !important;
+    }
+    .clio-gps-marker {
+      width: 18px;
+      height: 18px;
+      border-radius: 9999px;
+      background: #5b826e;
+      border: 3px solid #ffffff;
+      box-shadow: 0 0 0 6px rgba(91, 130, 110, 0.35);
+    }
   </style>
 </head>
 
@@ -87,6 +108,7 @@
         <div class="flex items-center gap-1.5">
           <h1 class="text-base font-extrabold tracking-tight text-gray-900 dark:text-white">MiClio</h1>
           <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-clio-200/70 dark:bg-clio-800 text-clio-800 dark:text-clio-200">1.6 16v</span>
+          <span id="badgeGpsHeader" class="hidden text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-red-500 text-white animate-pulse">● GPS EN VIVO</span>
         </div>
         <p class="text-[11px] text-gray-500 dark:text-gray-400 flex items-center gap-1">
           <i class="fa-solid fa-gauge-simple-high text-[10px] text-clio-500"></i>
@@ -169,6 +191,23 @@
         </div>
       </div>
 
+      <!-- ACCESO DIRECTO A TRAYECTO EN VIVO GPS -->
+      <div onclick="irASeccion('vivo')" class="bg-gradient-to-r from-clio-800 to-clio-600 text-white rounded-2xl p-4 shadow-md flex items-center justify-between cursor-pointer active:scale-[0.98] transition">
+        <div class="flex items-center gap-3.5">
+          <div class="w-11 h-11 rounded-2xl bg-white/15 flex items-center justify-center text-lg">
+            <i class="fa-solid fa-location-arrow"></i>
+          </div>
+          <div>
+            <div class="text-sm font-extrabold flex items-center gap-2">
+              Trayecto en Vivo con GPS
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/20">NUEVO</span>
+            </div>
+            <p class="text-[11px] text-clio-100 mt-0.5">Dibuja el mapa, detecta km, velocidades y carga solo</p>
+          </div>
+        </div>
+        <i class="fa-solid fa-chevron-right text-sm opacity-80"></i>
+      </div>
+
       <!-- BANNER DE CICLO ENTRE TANQUES LLENOS -->
       <div class="bg-white dark:bg-[#1c221f] rounded-2xl p-3.5 border border-gray-200/80 dark:border-white/5 shadow-sm flex items-center justify-between">
         <div class="flex items-center gap-3">
@@ -227,7 +266,7 @@
       <!-- ÚLTIMOS MOVIMIENTOS -->
       <div class="bg-white dark:bg-[#1c221f] rounded-2xl p-4 border border-gray-200/80 dark:border-white/5 shadow-sm">
         <div class="flex items-center justify-between mb-3">
-          <h2 class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Últimos Movimientos (Editar / Borrar)</h2>
+          <h2 class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Últimos Movimientos</h2>
           <button onclick="irASeccion('historial')" class="text-xs font-bold text-clio-600 dark:text-clio-400">Ver todos</button>
         </div>
         <div id="listaRecientes" class="space-y-2.5"></div>
@@ -235,7 +274,88 @@
 
     </section>
 
-    <!-- ================= SECCIÓN 2: BITÁCORA ================= -->
+    <!-- ================= SECCIÓN 2: TRAYECTO EN VIVO (GPS) ================= -->
+    <section id="view-vivo" class="hidden space-y-4">
+
+      <div class="bg-white dark:bg-[#1c221f] rounded-3xl p-4 border border-gray-200/80 dark:border-white/5 shadow-sm space-y-3.5">
+        
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-base font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
+              <i class="fa-solid fa-satellite-dish text-clio-500"></i> Trayecto en Vivo
+            </h2>
+            <p id="gpsStatusText" class="text-[11px] text-gray-500 dark:text-gray-400">Listo para iniciar seguimiento satelital</p>
+          </div>
+
+          <button onclick="toggleSimulacionGps()" id="btnSimularGps" class="text-[11px] font-bold px-2.5 py-1.5 rounded-xl bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300 active:scale-95 transition">
+            <i class="fa-solid fa-play mr-1 text-clio-500"></i> Simular
+          </button>
+        </div>
+
+        <!-- MAPA INTERACTIVO -->
+        <div class="relative rounded-2xl overflow-hidden border border-gray-200 dark:border-white/10">
+          <div id="mapLive"></div>
+          <!-- Overlay de calle actual y velocidad -->
+          <div class="absolute bottom-2.5 left-2.5 right-2.5 z-20 bg-black/75 backdrop-blur-md text-white px-3 py-2 rounded-xl flex items-center justify-between text-xs">
+            <div class="truncate pr-2">
+              <span class="text-[10px] text-gray-300 block">Ubicación / Vía detectada</span>
+              <strong id="liveStreetName" class="text-xs font-bold truncate block">Esperando señal GPS...</strong>
+            </div>
+            <div class="text-right shrink-0 pl-2 border-l border-white/15">
+              <span id="liveSpeedVal" class="text-lg font-black text-clio-300">0</span>
+              <span class="text-[10px] text-gray-300 block">km/h</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- MÉTRICAS EN VIVO -->
+        <div class="grid grid-cols-3 gap-2.5">
+          <div class="bg-gray-50 dark:bg-[#141917] rounded-2xl p-3 border border-gray-200/60 dark:border-white/5 text-center">
+            <span class="text-[10px] font-bold uppercase text-gray-400 block">Distancia</span>
+            <div class="text-xl font-black text-gray-900 dark:text-white mt-0.5">
+              <span id="liveDistKm">0.00</span> <span class="text-xs font-bold text-clio-500">km</span>
+            </div>
+            <span id="liveTimer" class="text-[10px] text-gray-400 font-semibold">00:00</span>
+          </div>
+
+          <div class="bg-gray-50 dark:bg-[#141917] rounded-2xl p-3 border border-gray-200/60 dark:border-white/5 text-center">
+            <span class="text-[10px] font-bold uppercase text-gray-400 block">Tipo Detectado</span>
+            <div id="liveDetectedStyle" class="text-sm font-extrabold text-amber-500 mt-1.5">
+              <i class="fa-solid fa-traffic-light"></i> Calle
+            </div>
+            <span id="liveHighwayPct" class="text-[10px] text-gray-400">0% autopista</span>
+          </div>
+
+          <div class="bg-gray-50 dark:bg-[#141917] rounded-2xl p-3 border border-gray-200/60 dark:border-white/5 text-center">
+            <span class="text-[10px] font-bold uppercase text-gray-400 block">Nafta Usada</span>
+            <div class="text-xl font-black text-red-400 mt-0.5">
+              -<span id="liveLitrosUsados">0.00</span> <span class="text-xs font-bold">L</span>
+            </div>
+            <span id="liveVelProm" class="text-[10px] text-gray-400">Prom: 0 km/h</span>
+          </div>
+        </div>
+
+        <!-- BOTONES DE CONTROL DEL VIAJE EN VIVO -->
+        <div class="pt-1">
+          <button id="btnStartLive" onclick="iniciarViajeEnVivo()" class="w-full py-4 rounded-2xl bg-clio-500 hover:bg-clio-600 text-white font-extrabold text-sm shadow-lg flex items-center justify-center gap-2 active:scale-95 transition">
+            <i class="fa-solid fa-play"></i> Iniciar Viaje en Vivo
+          </button>
+
+          <div id="controlesViajeActivo" class="hidden grid grid-cols-2 gap-2.5">
+            <button onclick="cancelarViajeEnVivo()" class="py-3.5 rounded-2xl bg-gray-200 dark:bg-white/10 text-gray-700 dark:text-gray-300 font-bold text-xs active:scale-95 transition">
+              Descartar
+            </button>
+            <button onclick="finalizarYGuardarViajeEnVivo()" class="py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs shadow-lg flex items-center justify-center gap-1.5 active:scale-95 transition">
+              <i class="fa-solid fa-flag-checkered"></i> Finalizar y Cargar
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ================= SECCIÓN 3: BITÁCORA ================= -->
     <section id="view-historial" class="hidden space-y-4">
       <div class="bg-white dark:bg-[#1c221f] rounded-2xl p-4 border border-gray-200/80 dark:border-white/5 shadow-sm">
         <div class="flex items-center justify-between mb-3">
@@ -249,7 +369,7 @@
       </div>
     </section>
 
-    <!-- ================= SECCIÓN 3: CONSUMOS Y AJUSTES ================= -->
+    <!-- ================= SECCIÓN 4: CONSUMOS Y AJUSTES ================= -->
     <section id="view-consumos" class="hidden space-y-4">
       <div class="bg-white dark:bg-[#1c221f] rounded-2xl p-4 border border-gray-200/80 dark:border-white/5 shadow-sm space-y-4">
         <div>
@@ -344,28 +464,32 @@
 
   </main>
 
-  <!-- BOTÓN FLOTANTE (+) PARA CARGAR RECORRIDO -->
-  <button onclick="abrirModalViaje()" aria-label="Cargar recorrido" class="fixed right-5 bottom-24 z-40 w-14 h-14 rounded-full bg-clio-500 hover:bg-clio-600 text-white shadow-xl shadow-clio-950/50 flex items-center justify-center text-2xl active:scale-90 transition">
+  <!-- BOTÓN FLOTANTE (+) PARA CARGAR RECORRIDO MANUAL -->
+  <button onclick="abrirModalViaje()" aria-label="Cargar recorrido manual" class="fixed right-5 bottom-24 z-40 w-14 h-14 rounded-full bg-clio-500 hover:bg-clio-600 text-white shadow-xl shadow-clio-950/50 flex items-center justify-center text-2xl active:scale-90 transition">
     <i class="fa-solid fa-plus"></i>
   </button>
 
-  <!-- BARRA DE NAVEGACIÓN INFERIOR -->
+  <!-- BARRA DE NAVEGACIÓN INFERIOR (5 ÍTEMS CON "EN VIVO") -->
   <nav class="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-[#181e1b]/95 backdrop-blur-lg border-t border-gray-200 dark:border-white/10 z-40 safe-bottom">
-    <div class="max-w-md mx-auto grid grid-cols-4 items-center h-16 px-2">
+    <div class="max-w-md mx-auto grid grid-cols-5 items-center h-16 px-1">
       <button onclick="irASeccion('tablero')" id="nav-tablero" class="flex flex-col items-center justify-center text-clio-500">
-        <i class="fa-solid fa-gauge-high text-lg"></i>
+        <i class="fa-solid fa-gauge-high text-base"></i>
         <span class="text-[10px] font-bold mt-1">Tablero</span>
       </button>
+      <button onclick="irASeccion('vivo')" id="nav-vivo" class="flex flex-col items-center justify-center text-gray-400 hover:text-clio-400">
+        <i class="fa-solid fa-location-arrow text-base"></i>
+        <span class="text-[10px] font-semibold mt-1">En Vivo</span>
+      </button>
       <button onclick="abrirModalCarga()" class="flex flex-col items-center justify-center text-gray-400 hover:text-clio-400">
-        <i class="fa-solid fa-gas-pump text-lg"></i>
-        <span class="text-[10px] font-semibold mt-1">Cargar Nafta</span>
+        <i class="fa-solid fa-gas-pump text-base"></i>
+        <span class="text-[10px] font-semibold mt-1">Surtidor</span>
       </button>
       <button onclick="irASeccion('historial')" id="nav-historial" class="flex flex-col items-center justify-center text-gray-400 hover:text-clio-400">
-        <i class="fa-solid fa-clock-rotate-left text-lg"></i>
+        <i class="fa-solid fa-clock-rotate-left text-base"></i>
         <span class="text-[10px] font-semibold mt-1">Bitácora</span>
       </button>
       <button onclick="irASeccion('consumos')" id="nav-consumos" class="flex flex-col items-center justify-center text-gray-400 hover:text-clio-400">
-        <i class="fa-solid fa-sliders text-lg"></i>
+        <i class="fa-solid fa-sliders text-base"></i>
         <span class="text-[10px] font-semibold mt-1">Consumos</span>
       </button>
     </div>
@@ -616,8 +740,6 @@
     }
 
     // ==================== MOTOR DE RECÁLCULO EN CADENA ====================
-    // Recorre el historial desde el más antiguo al más reciente para que editar o borrar
-    // cualquier viaje o carga de nafta recalcule exactamente litros, odómetro y ciclos.
     function recalcularEstadoDesdeHistorial() {
       const cap = state.capacidadTanque;
       let litros = cap;
@@ -633,7 +755,6 @@
         kmPorEstilo: { calle: 0, mixto: 0, ruta: 0 }
       };
 
-      // Procesar de más viejo a más nuevo
       const cronologico = [...state.historial].reverse();
 
       for (const item of cronologico) {
@@ -658,7 +779,6 @@
             ultCargaTipo = `Parcial (+${Number(item.litros).toFixed(1)}L)`;
             item.nota = `Carga Parcial (+${Number(item.litros).toFixed(1)}L) · Acumulado ciclo: ${ciclo.litrosParcialesAcumulados.toFixed(1)}L`;
           } else {
-            // Tanque lleno
             const esPrimer = item.esPrimerLleno || Number(item.litros) <= 0;
             if (!esPrimer && ciclo.odometroInicioLleno && odo > ciclo.odometroInicioLleno) {
               const kmTotalesCiclo = odo - ciclo.odometroInicioLleno;
@@ -709,6 +829,13 @@
       } else {
         html.classList.remove('dark');
         icon.className = 'fa-solid fa-moon text-sm text-clio-700';
+      }
+      if (liveMapTileLayer) {
+        liveMapTileLayer.setUrl(
+          state.theme === 'dark'
+            ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+            : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
+        );
       }
     }
 
@@ -809,7 +936,7 @@
     }
 
     function irASeccion(sec) {
-      ['tablero', 'historial', 'consumos'].forEach(s => {
+      ['tablero', 'vivo', 'historial', 'consumos'].forEach(s => {
         document.getElementById(`view-${s}`).classList.add('hidden');
         const nav = document.getElementById(`nav-${s}`);
         if (nav) nav.className = 'flex flex-col items-center justify-center text-gray-400 hover:text-clio-400';
@@ -817,9 +944,374 @@
       document.getElementById(`view-${sec}`).classList.remove('hidden');
       const activeNav = document.getElementById(`nav-${sec}`);
       if (activeNav) activeNav.className = 'flex flex-col items-center justify-center text-clio-500';
+
+      if (sec === 'vivo') {
+        initLiveMap();
+        setTimeout(() => {
+          if (liveMap) liveMap.invalidateSize();
+        }, 150);
+      }
     }
 
-    // ==================== MODAL VIAJE (NUEVO O EDITAR) ====================
+    // ==================== TRAYECTO EN VIVO (GPS + MAPA + DETECCIÓN AUTOMÁTICA) ====================
+    let liveMap = null;
+    let liveMapTileLayer = null;
+    let livePolyline = null;
+    let liveMarker = null;
+    let liveWatchId = null;
+    let liveSimInterval = null;
+    let wakeLockObj = null;
+
+    let liveTrip = {
+      active: false,
+      startTime: null,
+      timerInterval: null,
+      coords: [],
+      totalKm: 0,
+      fastKm: 0, // km recorridos a > 70 km/h (autopista/ruta)
+      currentSpeedKmh: 0,
+      startStreet: '',
+      endStreet: '',
+      detectedStyle: 'calle'
+    };
+
+    function initLiveMap() {
+      if (liveMap) return;
+      // Coordenadas iniciales por defecto (Zona Norte GBA / Villa Adelina - Ballester)
+      const defaultLatLng = [-34.535, -58.545];
+      liveMap = L.map('mapLive', { zoomControl: false }).setView(defaultLatLng, 14);
+
+      const tileUrl = state.theme === 'dark'
+        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+        : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+
+      liveMapTileLayer = L.tileLayer(tileUrl, { maxZoom: 19 }).addTo(liveMap);
+
+      const icon = L.divIcon({
+        className: 'clio-gps-marker',
+        iconSize: [18, 18],
+        iconAnchor: [9, 9]
+      });
+
+      liveMarker = L.marker(defaultLatLng, { icon }).addTo(liveMap);
+      livePolyline = L.polyline([], { color: '#5b826e', weight: 5, opacity: 0.9 }).addTo(liveMap);
+
+      // Centrar en ubicación real apenas abre la pestaña
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(pos => {
+          const latlng = [pos.coords.latitude, pos.coords.longitude];
+          liveMap.setView(latlng, 16);
+          liveMarker.setLatLng(latlng);
+          obtenerNombreCalle(latlng[0], latlng[1], true);
+        }, () => {});
+      }
+    }
+
+    // Fórmula Haversine para calcular distancia entre dos puntos GPS en km
+    function calcularDistanciaHaversine(lat1, lon1, lat2, lon2) {
+      const R = 6371;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    }
+
+    // Reverse Geocoding gratuito con Nominatim (OpenStreetMap)
+    async function obtenerNombreCalle(lat, lon, esInicio = false) {
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`, {
+          headers: { 'Accept-Language': 'es' }
+        });
+        const data = await res.json();
+        const road = data.address?.road || data.address?.suburb || data.address?.town || '';
+        const city = data.address?.city || data.address?.town || data.address?.suburb || '';
+        const label = road ? (city ? `${road}, ${city}` : road) : 'Ubicación GPS activa';
+        document.getElementById('liveStreetName').innerText = label;
+        if (esInicio && !liveTrip.startStreet && road) liveTrip.startStreet = road;
+        if (road) liveTrip.endStreet = road;
+      } catch (e) {}
+    }
+
+    async function activarWakeLock() {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLockObj = await navigator.wakeLock.request('screen');
+        }
+      } catch (e) {}
+    }
+
+    function liberarWakeLock() {
+      if (wakeLockObj) {
+        wakeLockObj.release().catch(() => {});
+        wakeLockObj = null;
+      }
+    }
+
+    function iniciarViajeEnVivo() {
+      initLiveMap();
+      detenerSimulacionGps();
+
+      liveTrip = {
+        active: true,
+        startTime: Date.now(),
+        timerInterval: null,
+        coords: [],
+        totalKm: 0,
+        fastKm: 0,
+        currentSpeedKmh: 0,
+        startStreet: '',
+        endStreet: '',
+        detectedStyle: 'calle'
+      };
+
+      livePolyline.setLatLngs([]);
+      document.getElementById('btnStartLive').classList.add('hidden');
+      document.getElementById('controlesViajeActivo').classList.remove('hidden');
+      document.getElementById('badgeGpsHeader').classList.remove('hidden');
+      document.getElementById('gpsStatusText').innerText = 'Grabando trazado GPS en tiempo real...';
+
+      activarWakeLock();
+
+      liveTrip.timerInterval = setInterval(actualizarCronometroVivo, 1000);
+
+      if (navigator.geolocation) {
+        liveWatchId = navigator.geolocation.watchPosition(
+          procesarPuntoGps,
+          err => {
+            document.getElementById('gpsStatusText').innerText = 'Señal GPS débil. Asegurate de dar permiso de ubicación.';
+          },
+          { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 }
+        );
+      }
+      actualizarPanelVivo();
+    }
+
+    function procesarPuntoGps(pos) {
+      if (!liveTrip.active) return;
+
+      const lat = pos.coords.latitude;
+      const lon = pos.coords.longitude;
+      const accuracy = pos.coords.accuracy || 10;
+
+      // Ignorar rebotes muy imprecisos (> 65m)
+      if (accuracy > 65 && liveTrip.coords.length > 0) return;
+
+      const now = Date.now();
+      let speedKmh = pos.coords.speed !== null && pos.coords.speed >= 0
+        ? pos.coords.speed * 3.6
+        : 0;
+
+      if (liveTrip.coords.length > 0) {
+        const prev = liveTrip.coords[liveTrip.coords.length - 1];
+        const distKm = calcularDistanciaHaversine(prev.lat, prev.lon, lat, lon);
+        const dtHours = (now - prev.time) / 3600000;
+
+        // Filtro anti-ruido: ignorar micro-saltos menores a 8 metros
+        if (distKm < 0.008) return;
+
+        if (speedKmh === 0 && dtHours > 0) {
+          speedKmh = Math.min(160, distKm / dtHours);
+        }
+
+        liveTrip.totalKm += distKm;
+        // Si este tramo se recorrió a más de 70 km/h, suma como tramo de autopista/ruta
+        if (speedKmh >= 70) {
+          liveTrip.fastKm += distKm;
+        }
+      } else {
+        obtenerNombreCalle(lat, lon, true);
+      }
+
+      liveTrip.currentSpeedKmh = Math.round(speedKmh);
+      liveTrip.coords.push({ lat, lon, time: now });
+
+      const latlngs = liveTrip.coords.map(c => [c.lat, c.lon]);
+      livePolyline.setLatLngs(latlngs);
+      liveMarker.setLatLng([lat, lon]);
+      liveMap.panTo([lat, lon]);
+
+      // Cada 12 puntos consultamos el nombre de la calle actual
+      if (liveTrip.coords.length % 12 === 0) {
+        obtenerNombreCalle(lat, lon, false);
+      }
+
+      clasificarEstiloEnVivo();
+      actualizarPanelVivo();
+    }
+
+    function clasificarEstiloEnVivo() {
+      const ratioFast = liveTrip.totalKm > 0.05 ? (liveTrip.fastKm / liveTrip.totalKm) : 0;
+      if (ratioFast >= 0.65) {
+        liveTrip.detectedStyle = 'ruta';
+      } else if (ratioFast >= 0.25) {
+        liveTrip.detectedStyle = 'mixto';
+      } else {
+        liveTrip.detectedStyle = 'calle';
+      }
+    }
+
+    function actualizarCronometroVivo() {
+      if (!liveTrip.active || !liveTrip.startTime) return;
+      const sec = Math.floor((Date.now() - liveTrip.startTime) / 1000);
+      const m = String(Math.floor(sec / 60)).padStart(2, '0');
+      const s = String(sec % 60).padStart(2, '0');
+      document.getElementById('liveTimer').innerText = `${m}:${s}`;
+    }
+
+    function actualizarPanelVivo() {
+      document.getElementById('liveSpeedVal').innerText = liveTrip.currentSpeedKmh;
+      document.getElementById('liveDistKm').innerText = liveTrip.totalKm.toFixed(2);
+
+      const pctFast = liveTrip.totalKm > 0.02 ? Math.round((liveTrip.fastKm / liveTrip.totalKm) * 100) : 0;
+      document.getElementById('liveHighwayPct').innerText = `${pctFast}% autopista`;
+
+      const elStyle = document.getElementById('liveDetectedStyle');
+      if (liveTrip.detectedStyle === 'ruta') {
+        elStyle.className = 'text-sm font-extrabold text-emerald-500 mt-1.5';
+        elStyle.innerHTML = `<i class="fa-solid fa-highway"></i> Ruta`;
+      } else if (liveTrip.detectedStyle === 'mixto') {
+        elStyle.className = 'text-sm font-extrabold text-clio-400 mt-1.5';
+        elStyle.innerHTML = `<i class="fa-solid fa-road-circle-check"></i> Mixto`;
+      } else {
+        elStyle.className = 'text-sm font-extrabold text-amber-500 mt-1.5';
+        elStyle.innerHTML = `<i class="fa-solid fa-traffic-light"></i> Calle`;
+      }
+
+      const consumoAplicado = state.consumos[liveTrip.detectedStyle] || state.consumos.calle;
+      const litros = (liveTrip.totalKm * consumoAplicado) / 100;
+      document.getElementById('liveLitrosUsados').innerText = litros.toFixed(2);
+
+      const elapsedHours = liveTrip.startTime ? (Date.now() - liveTrip.startTime) / 3600000 : 0;
+      const velProm = elapsedHours > 0.002 ? Math.round(liveTrip.totalKm / elapsedHours) : 0;
+      document.getElementById('liveVelProm').innerText = `Prom: ${velProm} km/h`;
+    }
+
+    function detenerSensoresVivo() {
+      if (liveWatchId !== null && navigator.geolocation) {
+        navigator.geolocation.clearWatch(liveWatchId);
+        liveWatchId = null;
+      }
+      if (liveTrip.timerInterval) {
+        clearInterval(liveTrip.timerInterval);
+        liveTrip.timerInterval = null;
+      }
+      detenerSimulacionGps();
+      liberarWakeLock();
+      liveTrip.active = false;
+      document.getElementById('btnStartLive').classList.remove('hidden');
+      document.getElementById('controlesViajeActivo').classList.add('hidden');
+      document.getElementById('badgeGpsHeader').classList.add('hidden');
+    }
+
+    function cancelarViajeEnVivo() {
+      if (!confirm('¿Descartar el trayecto en vivo actual sin guardarlo?')) return;
+      detenerSensoresVivo();
+      liveTrip.totalKm = 0;
+      liveTrip.fastKm = 0;
+      liveTrip.currentSpeedKmh = 0;
+      if (livePolyline) livePolyline.setLatLngs([]);
+      document.getElementById('gpsStatusText').innerText = 'Trayecto descartado';
+      actualizarPanelVivo();
+    }
+
+    async function finalizarYGuardarViajeEnVivo() {
+      if (liveTrip.totalKm < 0.05) {
+        alert('Todavía no recorriste suficiente distancia (mínimo 50 metros) para guardar el viaje.');
+        return;
+      }
+
+      // Obtener nombre de la calle final si hay coordenadas
+      if (liveTrip.coords.length > 0) {
+        const last = liveTrip.coords[liveTrip.coords.length - 1];
+        await obtenerNombreCalle(last.lat, last.lon, false);
+      }
+
+      const kmRedondeados = Number(liveTrip.totalKm.toFixed(1));
+      const estiloFinal = liveTrip.detectedStyle;
+      const consumo = state.consumos[estiloFinal] || state.consumos.calle;
+      const litrosGastados = (kmRedondeados * consumo) / 100;
+
+      let notaAutomatica = `GPS (${estiloFinal.toUpperCase()})`;
+      if (liveTrip.startStreet && liveTrip.endStreet && liveTrip.startStreet !== liveTrip.endStreet) {
+        notaAutomatica = `GPS: ${liveTrip.startStreet} → ${liveTrip.endStreet}`;
+      } else if (liveTrip.endStreet) {
+        notaAutomatica = `GPS por ${liveTrip.endStreet}`;
+      }
+
+      detenerSensoresVivo();
+
+      state.historial.unshift({
+        id: Date.now(),
+        tipo: 'viaje',
+        km: kmRedondeados,
+        litros: litrosGastados,
+        estilo: estiloFinal,
+        notaPersonalizada: notaAutomatica,
+        nota: notaAutomatica,
+        odometro: state.odometroActual ? Math.round(Number(state.odometroActual) + kmRedondeados) : null,
+        fecha: new Date().toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+      });
+
+      recalcularEstadoDesdeHistorial();
+      saveState();
+
+      document.getElementById('gpsStatusText').innerText = `¡Viaje guardado! (${kmRedondeados} km en ${estiloFinal})`;
+      irASeccion('tablero');
+    }
+
+    // Modo Simulación para probar en vivo cómo dibuja el trazado y detecta calle/autopista
+    function toggleSimulacionGps() {
+      if (liveSimInterval) {
+        detenerSimulacionGps();
+        return;
+      }
+      if (!liveTrip.active) {
+        iniciarViajeEnVivo();
+      }
+      document.getElementById('btnSimularGps').innerHTML = `<i class="fa-solid fa-stop mr-1 text-red-500"></i> Detener Sim`;
+      document.getElementById('gpsStatusText').innerText = 'Simulando recorrido por Av. Márquez → Panamericana...';
+
+      let simLat = liveTrip.coords.length > 0 ? liveTrip.coords[liveTrip.coords.length - 1].lat : -34.535;
+      let simLon = liveTrip.coords.length > 0 ? liveTrip.coords[liveTrip.coords.length - 1].lon : -58.545;
+      let step = 0;
+
+      liveTrip.startStreet = 'Av. Márquez';
+      liveTrip.endStreet = 'Au. Panamericana';
+
+      liveSimInterval = setInterval(() => {
+        step++;
+        // Primeros pasos velocidad de calle (42 km/h), luego sube a autopista (95 km/h)
+        const isHighway = step > 6;
+        const speedKmh = isHighway ? 92 + Math.random() * 12 : 38 + Math.random() * 10;
+        simLat += 0.0011;
+        simLon += isHighway ? 0.0018 : 0.0008;
+
+        document.getElementById('liveStreetName').innerText = isHighway ? 'Au. Panamericana (RN 9)' : 'Av. Bernabé Márquez';
+
+        procesarPuntoGps({
+          coords: {
+            latitude: simLat,
+            longitude: simLon,
+            accuracy: 5,
+            speed: speedKmh / 3.6
+          }
+        });
+      }, 1200);
+    }
+
+    function detenerSimulacionGps() {
+      if (liveSimInterval) {
+        clearInterval(liveSimInterval);
+        liveSimInterval = null;
+      }
+      const btn = document.getElementById('btnSimularGps');
+      if (btn) btn.innerHTML = `<i class="fa-solid fa-play mr-1 text-clio-500"></i> Simular`;
+    }
+
+    // ==================== MODAL VIAJE MANUAL (NUEVO O EDITAR) ====================
     function abrirModalViaje(idEditar = null) {
       editandoViajeId = idEditar;
 
@@ -921,7 +1413,7 @@
       cerrarModalViaje();
     }
 
-    // ==================== MODAL CARGA DE NAFTA (NUEVA O EDITAR) ====================
+    // ==================== MODAL CARGA DE NAFTA ====================
     function abrirModalCarga(idEditar = null) {
       editandoCargaId = idEditar;
 
@@ -1028,7 +1520,6 @@
       const estiloCicloElegido = detectarEstiloUnico();
 
       if (editandoCargaId !== null) {
-        // Editando una carga existente
         const item = state.historial.find(x => x.id === editandoCargaId);
         if (item) {
           item.subtipo = tipoCargaSeleccionado;
@@ -1045,7 +1536,6 @@
         return;
       }
 
-      // Nueva carga
       const nuevoItem = {
         id: Date.now(),
         tipo: 'carga',
@@ -1123,7 +1613,7 @@
       saveState();
     }
 
-    // ==================== HISTORIAL (CON EDITAR Y BORRAR PARA VIAJES Y CARGAS) ====================
+    // ==================== HISTORIAL ====================
     function renderHistorial() {
       const recientesContainer = document.getElementById('listaRecientes');
       const completoContainer = document.getElementById('listaHistorialCompleto');
@@ -1169,7 +1659,6 @@
             </div>
           `;
         } else {
-          // Ítem de Carga de Combustible (También con Editar y Borrar)
           return `
             <div class="flex items-center justify-between p-2.5 rounded-xl bg-clio-500/10 border border-clio-500/30">
               <div class="flex items-center gap-2.5 min-w-0">

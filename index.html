@@ -74,9 +74,8 @@
     .numpad-btn:active {
       transform: scale(0.94);
     }
-    /* Mapas Leaflet con OpenStreetMap libre (sin API Key) y Modo Oscuro por CSS */
     #mapLive, #mapSavedTrip {
-      height: 300px;
+      height: 290px;
       width: 100%;
       z-index: 10;
       background: #181e1b;
@@ -128,6 +127,12 @@
 
 <body class="bg-[#f4f6f4] dark:bg-[#121614] text-gray-900 dark:text-gray-100 font-sans antialiased min-h-screen transition-colors duration-200">
 
+  <!-- TOAST DE AVISO DE SEGUNDO PLANO -->
+  <div id="toastAviso" class="fixed top-16 left-4 right-4 max-w-md mx-auto z-50 hidden bg-clio-800 text-white px-4 py-3 rounded-2xl shadow-xl border border-clio-400/30 flex items-center gap-3 text-xs font-semibold">
+    <i class="fa-solid fa-satellite-dish text-clio-300 text-base animate-pulse"></i>
+    <span id="toastAvisoTexto">Recorrido actualizado tras volver de segundo plano.</span>
+  </div>
+
   <!-- HEADER -->
   <header class="sticky top-0 z-30 bg-[#f4f6f4]/90 dark:bg-[#121614]/90 backdrop-blur-md px-4 py-3.5 flex items-center justify-between border-b border-gray-200/70 dark:border-white/5">
     <div class="flex items-center gap-2.5">
@@ -140,7 +145,7 @@
         <div class="flex items-center gap-1.5">
           <h1 class="text-base font-extrabold tracking-tight text-gray-900 dark:text-white">MiClio</h1>
           <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-clio-200/70 dark:bg-clio-800 text-clio-800 dark:text-clio-200">1.6 16v</span>
-          <span id="badgeGpsHeader" class="hidden text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-red-500 text-white animate-pulse">● GPS EN VIVO</span>
+          <span id="badgeGpsHeader" onclick="irASeccion('vivo')" class="hidden cursor-pointer text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-red-500 text-white animate-pulse">● GRABANDO GPS</span>
         </div>
         <p class="text-[11px] text-gray-500 dark:text-gray-400 flex items-center gap-1">
           <i class="fa-solid fa-gauge-simple-high text-[10px] text-clio-500"></i>
@@ -232,9 +237,9 @@
           <div>
             <div class="text-sm font-extrabold flex items-center gap-2">
               Trayecto en Vivo con GPS
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/20">MAPA LIBRE</span>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/20">2do PLANO</span>
             </div>
-            <p class="text-[11px] text-clio-100 mt-0.5">Graba el mapa del recorrido, detecta km y uso solo</p>
+            <p class="text-[11px] text-clio-100 mt-0.5">Sigue grabando aunque salgas o apagues pantalla</p>
           </div>
         </div>
         <i class="fa-solid fa-chevron-right text-sm opacity-80"></i>
@@ -306,7 +311,7 @@
 
     </section>
 
-    <!-- ================= SECCIÓN 2: TRAYECTO EN VIVO (GPS) ================= -->
+    <!-- ================= SECCIÓN 2: TRAYECTO EN VIVO (GPS + SEGUNDO PLANO) ================= -->
     <section id="view-vivo" class="hidden space-y-4">
 
       <div class="bg-white dark:bg-[#1c221f] rounded-3xl p-4 border border-gray-200/80 dark:border-white/5 shadow-sm space-y-3.5">
@@ -316,12 +321,21 @@
             <h2 class="text-base font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
               <i class="fa-solid fa-satellite-dish text-clio-500"></i> Trayecto en Vivo
             </h2>
-            <p id="gpsStatusText" class="text-[11px] text-gray-500 dark:text-gray-400">El recorrido quedará guardado para verlo luego</p>
+            <p id="gpsStatusText" class="text-[11px] text-gray-500 dark:text-gray-400">Soporte activo para grabar en 2do plano</p>
           </div>
 
           <button onclick="toggleSimulacionGps()" id="btnSimularGps" class="text-[11px] font-bold px-2.5 py-1.5 rounded-xl bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300 active:scale-95 transition">
             <i class="fa-solid fa-play mr-1 text-clio-500"></i> Simular
           </button>
+        </div>
+
+        <!-- BANNER ESTADO PROTECCIÓN SEGUNDO PLANO -->
+        <div id="bannerBgStatus" class="px-3 py-2 rounded-xl bg-clio-500/10 border border-clio-500/25 flex items-center justify-between text-[11px]">
+          <div class="flex items-center gap-2">
+            <i id="iconBgStatus" class="fa-solid fa-shield-halved text-clio-500"></i>
+            <span id="txtBgStatus" class="font-semibold text-gray-700 dark:text-gray-200">Protección en 2do plano lista para activar</span>
+          </div>
+          <span id="pillBgStatus" class="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-clio-500/20 text-clio-600 dark:text-clio-300">Auto-Sync</span>
         </div>
 
         <!-- MAPA INTERACTIVO LIBRE DE API KEY -->
@@ -369,7 +383,7 @@
 
         <!-- BOTONES DE CONTROL DEL VIAJE EN VIVO -->
         <div class="pt-1">
-          <button id="btnStartLive" onclick="iniciarViajeEnVivo()" class="w-full py-4 rounded-2xl bg-clio-500 hover:bg-clio-600 text-white font-extrabold text-sm shadow-lg flex items-center justify-center gap-2 active:scale-95 transition">
+          <button id="btnStartLive" onclick="solicitarInicioViajeEnVivo()" class="w-full py-4 rounded-2xl bg-clio-500 hover:bg-clio-600 text-white font-extrabold text-sm shadow-lg flex items-center justify-center gap-2 active:scale-95 transition">
             <i class="fa-solid fa-play"></i> Iniciar Viaje en Vivo
           </button>
 
@@ -528,10 +542,11 @@
   </nav>
 
   <!-- =======================================================================
-       MODAL 1: NUEVO / EDITAR RECORRIDO (+) CON TECLADO NUMÉRICO
+       MODAL 1: NUEVO / EDITAR RECORRIDO (+) CON OPCIÓN DE "KM" O "NUEVO ODÓMETRO"
        ======================================================================= -->
   <div id="modalViaje" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex flex-col justify-end">
-    <div class="bg-[#f4f6f4] dark:bg-[#161b18] w-full max-w-md mx-auto rounded-t-3xl p-5 shadow-2xl border-t border-white/10 space-y-3.5">
+    <div class="bg-[#f4f6f4] dark:bg-[#161b18] w-full max-w-md mx-auto rounded-t-3xl p-4 shadow-2xl border-t border-white/10 space-y-3">
+      
       <div class="flex items-center justify-between">
         <button onclick="cerrarModalViaje()" class="w-8 h-8 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-600 dark:text-gray-300">
           <i class="fa-solid fa-xmark"></i>
@@ -540,61 +555,115 @@
         <div class="w-8"></div>
       </div>
 
+      <!-- SELECTOR DE MODO DE INGRESO: KM MANUAL vs NUEVO ODÓMETRO -->
+      <div id="selectorModoIngresoViaje" class="grid grid-cols-2 gap-1.5 p-1 bg-gray-200 dark:bg-[#111513] rounded-2xl">
+        <button onclick="cambiarModoIngresoViaje('km')" id="tabIngreso-km" class="py-2 rounded-xl font-bold text-xs bg-clio-500 text-white shadow transition">
+          <i class="fa-solid fa-route mr-1"></i> Km del Viaje
+        </button>
+        <button onclick="cambiarModoIngresoViaje('odometro')" id="tabIngreso-odometro" class="py-2 rounded-xl font-bold text-xs text-gray-600 dark:text-gray-400 transition">
+          <i class="fa-solid fa-gauge-simple-high mr-1"></i> Nuevo Odómetro
+        </button>
+      </div>
+
+      <!-- DISPLAY PRINCIPAL DINÁMICO -->
       <div class="bg-white dark:bg-[#1f2622] rounded-2xl p-3.5 border border-gray-200 dark:border-white/10 flex items-center justify-between">
         <div>
-          <span class="text-[10px] font-bold uppercase text-gray-400 block">Kilómetros recorridos</span>
+          <span id="labelInputViajePrincipal" class="text-[10px] font-bold uppercase text-gray-400 block">Kilómetros recorridos</span>
           <div class="flex items-baseline gap-1.5 mt-0.5">
             <span id="displayViajeKm" class="text-3xl font-extrabold text-gray-900 dark:text-white">0</span>
             <span class="text-sm font-bold text-clio-500">km</span>
           </div>
+          <span id="subtextoOdometroAnterior" class="hidden text-[10px] font-semibold text-gray-400 mt-0.5 block">
+            Anterior: <strong id="valOdometroAnterior">0</strong> km
+          </span>
         </div>
+
+        <!-- En modo odómetro muestra grande la distancia calculada para verificar que no le erraste -->
         <div class="text-right">
+          <div id="cajaDistanciaCalculada" class="hidden mb-1 px-2.5 py-1 rounded-xl bg-clio-500/15 border border-clio-500/30">
+            <span class="text-[9px] uppercase font-bold text-clio-400 block">Distancia del viaje</span>
+            <span id="previewDistanciaPorOdo" class="text-sm font-black text-clio-500 dark:text-clio-300">+0.0 km</span>
+          </div>
           <span class="text-[10px] text-gray-400 block">Consumo estimado</span>
           <span id="previewLitrosViaje" class="text-sm font-bold text-amber-500">-0.00 L</span>
         </div>
       </div>
 
+      <!-- Atajos rápidos (en modo odómetro suman al odómetro actual) -->
       <div class="grid grid-cols-4 gap-2">
-        <button onclick="setQuickKm('5')" class="py-1.5 rounded-xl bg-white dark:bg-[#1f2622] border border-gray-200 dark:border-white/5 text-xs font-bold text-clio-600 dark:text-clio-300">+5 km</button>
-        <button onclick="setQuickKm('10')" class="py-1.5 rounded-xl bg-white dark:bg-[#1f2622] border border-gray-200 dark:border-white/5 text-xs font-bold text-clio-600 dark:text-clio-300">+10 km</button>
-        <button onclick="setQuickKm('25')" class="py-1.5 rounded-xl bg-white dark:bg-[#1f2622] border border-gray-200 dark:border-white/5 text-xs font-bold text-clio-600 dark:text-clio-300">+25 km</button>
-        <button onclick="setQuickKm('50')" class="py-1.5 rounded-xl bg-white dark:bg-[#1f2622] border border-gray-200 dark:border-white/5 text-xs font-bold text-clio-600 dark:text-clio-300">+50 km</button>
+        <button onclick="setQuickKm(5)" class="py-1.5 rounded-xl bg-white dark:bg-[#1f2622] border border-gray-200 dark:border-white/5 text-xs font-bold text-clio-600 dark:text-clio-300">+5 km</button>
+        <button onclick="setQuickKm(10)" class="py-1.5 rounded-xl bg-white dark:bg-[#1f2622] border border-gray-200 dark:border-white/5 text-xs font-bold text-clio-600 dark:text-clio-300">+10 km</button>
+        <button onclick="setQuickKm(25)" class="py-1.5 rounded-xl bg-white dark:bg-[#1f2622] border border-gray-200 dark:border-white/5 text-xs font-bold text-clio-600 dark:text-clio-300">+25 km</button>
+        <button onclick="setQuickKm(50)" class="py-1.5 rounded-xl bg-white dark:bg-[#1f2622] border border-gray-200 dark:border-white/5 text-xs font-bold text-clio-600 dark:text-clio-300">+50 km</button>
       </div>
 
+      <!-- Estilo de manejo -->
       <div>
         <span class="text-[11px] font-bold text-gray-500 dark:text-gray-400 block mb-1.5">Estilo de manejo (predeterminado Calle)</span>
         <div class="grid grid-cols-3 gap-2">
-          <button onclick="seleccionarEstiloViaje('calle')" id="chipEstilo-calle" class="py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 bg-clio-500 text-white shadow-sm">
+          <button onclick="seleccionarEstiloViaje('calle')" id="chipEstilo-calle" class="py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 bg-clio-500 text-white shadow-sm">
             <i class="fa-solid fa-traffic-light"></i> Calle
           </button>
-          <button onclick="seleccionarEstiloViaje('mixto')" id="chipEstilo-mixto" class="py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 bg-white dark:bg-[#1f2622] text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-white/10">
+          <button onclick="seleccionarEstiloViaje('mixto')" id="chipEstilo-mixto" class="py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 bg-white dark:bg-[#1f2622] text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-white/10">
             <i class="fa-solid fa-road-circle-check"></i> Mixto
           </button>
-          <button onclick="seleccionarEstiloViaje('ruta')" id="chipEstilo-ruta" class="py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 bg-white dark:bg-[#1f2622] text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-white/10">
+          <button onclick="seleccionarEstiloViaje('ruta')" id="chipEstilo-ruta" class="py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 bg-white dark:bg-[#1f2622] text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-white/10">
             <i class="fa-solid fa-highway"></i> Ruta
           </button>
         </div>
       </div>
 
-      <input type="text" id="inputNotaViaje" placeholder="Nota opcional (ej. Trabajo, Centro, Paseo...)" class="w-full bg-white dark:bg-[#1f2622] border border-gray-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-xs text-gray-800 dark:text-gray-100 outline-none">
+      <input type="text" id="inputNotaViaje" placeholder="Nota opcional (ej. Trabajo, Centro, Paseo...)" class="w-full bg-white dark:bg-[#1f2622] border border-gray-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs text-gray-800 dark:text-gray-100 outline-none">
 
-      <button id="btnConfirmarViaje" onclick="guardarViaje()" class="w-full py-3.5 rounded-2xl bg-clio-500 hover:bg-clio-600 text-white font-extrabold text-sm shadow-lg active:scale-95 transition">
+      <button id="btnConfirmarViaje" onclick="guardarViaje()" class="w-full py-3 rounded-2xl bg-clio-500 hover:bg-clio-600 text-white font-extrabold text-sm shadow-lg active:scale-95 transition">
         Descontar Recorrido
       </button>
 
-      <div class="grid grid-cols-3 gap-2 pt-1 safe-bottom">
-        <button onclick="teclaViaje('1')" class="numpad-btn py-3 rounded-xl bg-white dark:bg-[#1f2622] font-bold text-lg shadow-sm">1</button>
-        <button onclick="teclaViaje('2')" class="numpad-btn py-3 rounded-xl bg-white dark:bg-[#1f2622] font-bold text-lg shadow-sm">2</button>
-        <button onclick="teclaViaje('3')" class="numpad-btn py-3 rounded-xl bg-white dark:bg-[#1f2622] font-bold text-lg shadow-sm">3</button>
-        <button onclick="teclaViaje('4')" class="numpad-btn py-3 rounded-xl bg-white dark:bg-[#1f2622] font-bold text-lg shadow-sm">4</button>
-        <button onclick="teclaViaje('5')" class="numpad-btn py-3 rounded-xl bg-white dark:bg-[#1f2622] font-bold text-lg shadow-sm">5</button>
-        <button onclick="teclaViaje('6')" class="numpad-btn py-3 rounded-xl bg-white dark:bg-[#1f2622] font-bold text-lg shadow-sm">6</button>
-        <button onclick="teclaViaje('7')" class="numpad-btn py-3 rounded-xl bg-white dark:bg-[#1f2622] font-bold text-lg shadow-sm">7</button>
-        <button onclick="teclaViaje('8')" class="numpad-btn py-3 rounded-xl bg-white dark:bg-[#1f2622] font-bold text-lg shadow-sm">8</button>
-        <button onclick="teclaViaje('9')" class="numpad-btn py-3 rounded-xl bg-white dark:bg-[#1f2622] font-bold text-lg shadow-sm">9</button>
-        <button onclick="teclaViaje('.')" class="numpad-btn py-3 rounded-xl bg-white dark:bg-[#1f2622] font-bold text-lg shadow-sm">.</button>
-        <button onclick="teclaViaje('0')" class="numpad-btn py-3 rounded-xl bg-white dark:bg-[#1f2622] font-bold text-lg shadow-sm">0</button>
-        <button onclick="teclaViaje('DEL')" class="numpad-btn py-3 rounded-xl bg-gray-200 dark:bg-white/10 font-bold text-base flex items-center justify-center"><i class="fa-solid fa-delete-left"></i></button>
+      <!-- Teclado numérico -->
+      <div class="grid grid-cols-3 gap-1.5 pt-0.5 safe-bottom">
+        <button onclick="teclaViaje('1')" class="numpad-btn py-2.5 rounded-xl bg-white dark:bg-[#1f2622] font-bold text-lg shadow-sm">1</button>
+        <button onclick="teclaViaje('2')" class="numpad-btn py-2.5 rounded-xl bg-white dark:bg-[#1f2622] font-bold text-lg shadow-sm">2</button>
+        <button onclick="teclaViaje('3')" class="numpad-btn py-2.5 rounded-xl bg-white dark:bg-[#1f2622] font-bold text-lg shadow-sm">3</button>
+        <button onclick="teclaViaje('4')" class="numpad-btn py-2.5 rounded-xl bg-white dark:bg-[#1f2622] font-bold text-lg shadow-sm">4</button>
+        <button onclick="teclaViaje('5')" class="numpad-btn py-2.5 rounded-xl bg-white dark:bg-[#1f2622] font-bold text-lg shadow-sm">5</button>
+        <button onclick="teclaViaje('6')" class="numpad-btn py-2.5 rounded-xl bg-white dark:bg-[#1f2622] font-bold text-lg shadow-sm">6</button>
+        <button onclick="teclaViaje('7')" class="numpad-btn py-2.5 rounded-xl bg-white dark:bg-[#1f2622] font-bold text-lg shadow-sm">7</button>
+        <button onclick="teclaViaje('8')" class="numpad-btn py-2.5 rounded-xl bg-white dark:bg-[#1f2622] font-bold text-lg shadow-sm">8</button>
+        <button onclick="teclaViaje('9')" class="numpad-btn py-2.5 rounded-xl bg-white dark:bg-[#1f2622] font-bold text-lg shadow-sm">9</button>
+        <button onclick="teclaViaje('.')" class="numpad-btn py-2.5 rounded-xl bg-white dark:bg-[#1f2622] font-bold text-lg shadow-sm">.</button>
+        <button onclick="teclaViaje('0')" class="numpad-btn py-2.5 rounded-xl bg-white dark:bg-[#1f2622] font-bold text-lg shadow-sm">0</button>
+        <button onclick="teclaViaje('DEL')" class="numpad-btn py-2.5 rounded-xl bg-gray-200 dark:bg-white/10 font-bold text-base flex items-center justify-center"><i class="fa-solid fa-delete-left"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =======================================================================
+       MODAL PERMISO DE SEGUNDO PLANO (CARTEL AL INICIAR GPS EN VIVO)
+       ======================================================================= -->
+  <div id="modalPermisoSegundoPlano" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-[#181e1b] w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-clio-500/40 space-y-4 text-center">
+      <div class="w-14 h-14 rounded-2xl bg-clio-500/20 text-clio-500 flex items-center justify-center mx-auto text-2xl">
+        <i class="fa-solid fa-mobile-screen-button"></i>
+      </div>
+      <div>
+        <span class="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400">Grabación Continua</span>
+        <h3 class="text-lg font-extrabold text-gray-900 dark:text-white mt-2">Activar Modo Segundo Plano</h3>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+          Para que el celular no corte el GPS cuando salgas de la app o bloquees la pantalla, vamos a activar una <strong>notificación persistente</strong> y el <strong>recalculador vial automático</strong>.
+        </p>
+      </div>
+      <div class="bg-gray-100 dark:bg-[#121614] rounded-2xl p-3 text-left text-[11px] text-gray-600 dark:text-gray-300 space-y-1.5 border border-gray-200 dark:border-white/5">
+        <div><i class="fa-solid fa-check text-emerald-500 mr-1.5"></i> Mantiene viva la app al minimizarla.</div>
+        <div><i class="fa-solid fa-check text-emerald-500 mr-1.5"></i> Guarda cada punto en memoria al instante.</div>
+        <div><i class="fa-solid fa-check text-emerald-500 mr-1.5"></i> Si el celular suspende el GPS unos minutos, al volver reconstruye las calles exactas por donde fuiste.</div>
+      </div>
+      <div class="space-y-2 pt-1">
+        <button onclick="confirmarInicioConSegundoPlano()" class="w-full py-3.5 rounded-2xl bg-clio-500 hover:bg-clio-600 text-white font-extrabold text-xs shadow-lg active:scale-95 transition">
+          Activar Permisos e Iniciar Viaje
+        </button>
+        <button onclick="cerrarModalSegundoPlano()" class="w-full py-2.5 rounded-xl text-xs font-bold text-gray-400">
+          Cancelar
+        </button>
       </div>
     </div>
   </div>
@@ -613,7 +682,6 @@
         </button>
       </div>
 
-      <!-- Selector: Tanque Lleno vs Parcial -->
       <div class="grid grid-cols-2 gap-2 p-1 bg-gray-200 dark:bg-[#111513] rounded-2xl">
         <button onclick="setTipoCarga('lleno')" id="tabCarga-lleno" class="py-2.5 rounded-xl font-bold text-xs bg-clio-500 text-white shadow">
           ¡Tanque Lleno!
@@ -623,7 +691,6 @@
         </button>
       </div>
 
-      <!-- Input de Litros -->
       <div id="contenedorInputLitros" class="space-y-2">
         <div class="flex items-center justify-between">
           <label id="labelLitrosSurtidor" class="text-xs font-bold text-gray-600 dark:text-gray-300">
@@ -639,7 +706,6 @@
         </label>
       </div>
 
-      <!-- Input obligatorio: KM del Tablero -->
       <div class="space-y-1.5">
         <label class="text-xs font-bold text-gray-600 dark:text-gray-300 flex items-center justify-between">
           <span>Km en el tablero al cargar</span>
@@ -648,7 +714,6 @@
         <input type="number" id="inputOdometroCarga" placeholder="Ej: 185420" class="w-full bg-white dark:bg-[#222a26] border border-gray-300 dark:border-white/10 rounded-xl p-3 text-lg font-extrabold text-center outline-none focus:ring-2 focus:ring-clio-500">
       </div>
 
-      <!-- Selector de Uso del Tanque -->
       <div id="bloqueUsoTanque" class="space-y-1.5 pt-1 border-t border-gray-200 dark:border-white/10">
         <label class="text-xs font-bold text-gray-600 dark:text-gray-300 block">
           ¿Qué uso tuvo el auto desde el último lleno?
@@ -688,7 +753,6 @@
         <div id="mapSavedTrip"></div>
       </div>
 
-      <!-- Resumen del trayecto guardado -->
       <div class="grid grid-cols-3 gap-2 text-center">
         <div class="bg-white dark:bg-[#121614] p-2.5 rounded-xl border border-gray-200/60 dark:border-white/5">
           <span class="text-[10px] text-gray-400 block uppercase font-bold">Distancia</span>
@@ -756,7 +820,7 @@
       <div>
         <h3 class="text-lg font-extrabold text-gray-900 dark:text-white">Kilometraje del Tablero</h3>
         <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-          Ingresá cuántos kilómetros marca hoy el odómetro de tu Clio para dejar constancia ante reinicios y medir consumos entre tanques llenos.
+          Ingresá cuántos kilómetros marca hoy el odómetro de tu Clio para dejar constancia ante reinicios y calcular viajes por diferencia de tablero.
         </p>
       </div>
 
@@ -771,7 +835,7 @@
   <!-- LÓGICA DE LA APLICACIÓN -->
   <script>
     const STORAGE_KEY = 'miclio_v3_data';
-    // Servidor oficial de OpenStreetMap (100% gratuito y sin API Key)
+    const LIVE_TRIP_STORAGE_KEY = 'miclio_active_live_trip';
     const OSM_TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 
     const defaultData = {
@@ -804,7 +868,9 @@
       state.odometroBaseInicial = state.odometroActual;
     }
 
+    // Variables del modal de viaje manual
     let bufferViajeKm = '0';
+    let modoIngresoViaje = 'km'; // 'km' | 'odometro'
     let estiloViajeSeleccionado = 'calle';
     let tipoCargaSeleccionado = 'lleno';
     let editandoViajeId = null;
@@ -813,6 +879,13 @@
     function saveState() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       renderAll();
+    }
+
+    function mostrarToast(msg) {
+      const t = document.getElementById('toastAviso');
+      document.getElementById('toastAvisoTexto').innerText = msg;
+      t.classList.remove('hidden');
+      setTimeout(() => t.classList.add('hidden'), 5000);
     }
 
     // ==================== MOTOR DE RECÁLCULO EN CADENA ====================
@@ -1022,13 +1095,15 @@
       }
     }
 
-    // ==================== TRAYECTO EN VIVO (GPS + GUARDADO DE RUTA) ====================
+    // ==================== TRAYECTO EN VIVO + SEGUNDO PLANO + RECONEXIÓN OSRM ====================
     let liveMap = null;
     let livePolyline = null;
     let liveMarker = null;
     let liveWatchId = null;
     let liveSimInterval = null;
     let wakeLockObj = null;
+    let bgAudioCtx = null;
+    let bgKeepAliveTimer = null;
 
     let savedTripMap = null;
     let savedTripLayerGroup = null;
@@ -1043,8 +1118,96 @@
       currentSpeedKmh: 0,
       startStreet: '',
       endStreet: '',
-      detectedStyle: 'calle'
+      detectedStyle: 'calle',
+      lastPointTime: null
     };
+
+    function guardarViajeEnVivoEnStorage() {
+      if (!liveTrip.active) {
+        localStorage.removeItem(LIVE_TRIP_STORAGE_KEY);
+        return;
+      }
+      const snapshot = {
+        active: liveTrip.active,
+        startTime: liveTrip.startTime,
+        coords: liveTrip.coords,
+        totalKm: liveTrip.totalKm,
+        fastKm: liveTrip.fastKm,
+        startStreet: liveTrip.startStreet,
+        endStreet: liveTrip.endStreet,
+        detectedStyle: liveTrip.detectedStyle,
+        lastPointTime: liveTrip.lastPointTime
+      };
+      localStorage.setItem(LIVE_TRIP_STORAGE_KEY, JSON.stringify(snapshot));
+    }
+
+    // Mantiene vivo el hilo de ejecución en segundo plano en navegadores móviles (Audio inaudible + Notificación)
+    function activarCanalSegundoPlano() {
+      try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass && !bgAudioCtx) {
+          bgAudioCtx = new AudioContextClass();
+        }
+        if (bgAudioCtx && bgAudioCtx.state === 'suspended') {
+          bgAudioCtx.resume();
+        }
+        if (bgAudioCtx && !bgKeepAliveTimer) {
+          bgKeepAliveTimer = setInterval(() => {
+            if (!liveTrip.active) return;
+            try {
+              if (bgAudioCtx.state === 'suspended') bgAudioCtx.resume();
+              const osc = bgAudioCtx.createOscillator();
+              const gain = bgAudioCtx.createGain();
+              gain.gain.value = 0.00001; // Inaudible
+              osc.connect(gain);
+              gain.connect(bgAudioCtx.destination);
+              osc.start();
+              osc.stop(bgAudioCtx.currentTime + 0.05);
+            } catch (e) {}
+          }, 4000);
+        }
+
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.metadata = new MediaMetadata({
+            title: 'Grabando Recorrido GPS',
+            artist: 'MiClio 1.6 16v',
+            album: `${liveTrip.totalKm.toFixed(2)} km recorridos`
+          });
+        }
+      } catch (e) {}
+
+      // Mostrar notificación persistente si el usuario dio permiso
+      actualizarNotificacionSegundoPlano();
+    }
+
+    function actualizarNotificacionSegundoPlano() {
+      if (!('Notification' in window) || Notification.permission !== 'granted' || !liveTrip.active) return;
+      try {
+        const bodyTxt = `Distancia: ${liveTrip.totalKm.toFixed(2)} km · Uso: ${liveTrip.detectedStyle.toUpperCase()}`;
+        if (navigator.serviceWorker && navigator.serviceWorker.ready) {
+          navigator.serviceWorker.ready.then(reg => {
+            reg.showNotification('MiClio GPS en Vivo', {
+              body: bodyTxt,
+              tag: 'miclio-gps-live',
+              renotify: false,
+              silent: true
+            }).catch(() => {});
+          });
+        }
+      } catch (e) {}
+    }
+
+    function desactivarCanalSegundoPlano() {
+      if (bgKeepAliveTimer) {
+        clearInterval(bgKeepAliveTimer);
+        bgKeepAliveTimer = null;
+      }
+      if (navigator.serviceWorker && navigator.serviceWorker.ready) {
+        navigator.serviceWorker.ready.then(reg => {
+          reg.getNotifications({ tag: 'miclio-gps-live' }).then(notifs => notifs.forEach(n => n.close()));
+        }).catch(() => {});
+      }
+    }
 
     function initLiveMap() {
       if (liveMap) return;
@@ -1083,6 +1246,28 @@
       return R * c;
     }
 
+    // Si el celular durmió el GPS estando en segundo plano, reconstruye el camino real por las calles (OSRM gratis)
+    async function obtenerRutaVialEntrePuntos(lat1, lon1, lat2, lon2) {
+      try {
+        const url = `https://router.project-osrm.org/route/v1/driving/${lon1},${lat1};${lon2},${lat2}?overview=full&geometries=geojson`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
+          const route = data.routes[0];
+          const coords = route.geometry.coordinates.map(c => ({
+            lat: Number(c[1].toFixed(5)),
+            lon: Number(c[0].toFixed(5)),
+            time: Date.now()
+          }));
+          return {
+            distKm: route.distance / 1000,
+            coords: coords
+          };
+        }
+      } catch (e) {}
+      return null;
+    }
+
     async function obtenerNombreCalle(lat, lon, esInicio = false) {
       try {
         const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`, {
@@ -1113,52 +1298,89 @@
       }
     }
 
-    function iniciarViajeEnVivo() {
+    // Abre el cartel explicativo antes de iniciar para habilitar notificaciones y canal de 2do plano
+    function solicitarInicioViajeEnVivo() {
+      document.getElementById('modalPermisoSegundoPlano').classList.remove('hidden');
+    }
+
+    function cerrarModalSegundoPlano() {
+      document.getElementById('modalPermisoSegundoPlano').classList.add('hidden');
+    }
+
+    async function confirmarInicioConSegundoPlano() {
+      cerrarModalSegundoPlano();
+      if ('Notification' in window && Notification.permission === 'default') {
+        try {
+          await Notification.requestPermission();
+        } catch (e) {}
+      }
+      iniciarViajeEnVivo();
+    }
+
+    function iniciarViajeEnVivo(restaurado = false) {
       initLiveMap();
       detenerSimulacionGps();
 
-      liveTrip = {
-        active: true,
-        startTime: Date.now(),
-        timerInterval: null,
-        coords: [],
-        totalKm: 0,
-        fastKm: 0,
-        currentSpeedKmh: 0,
-        startStreet: '',
-        endStreet: '',
-        detectedStyle: 'calle'
-      };
+      if (!restaurado) {
+        liveTrip = {
+          active: true,
+          startTime: Date.now(),
+          timerInterval: null,
+          coords: [],
+          totalKm: 0,
+          fastKm: 0,
+          currentSpeedKmh: 0,
+          startStreet: '',
+          endStreet: '',
+          detectedStyle: 'calle',
+          lastPointTime: Date.now()
+        };
+        livePolyline.setLatLngs([]);
+      } else {
+        const latlngs = liveTrip.coords.map(c => [c.lat, c.lon]);
+        if (livePolyline) livePolyline.setLatLngs(latlngs);
+      }
 
-      livePolyline.setLatLngs([]);
       document.getElementById('btnStartLive').classList.add('hidden');
       document.getElementById('controlesViajeActivo').classList.remove('hidden');
       document.getElementById('badgeGpsHeader').classList.remove('hidden');
-      document.getElementById('gpsStatusText').innerText = 'Grabando recorrido GPS en vivo...';
+      document.getElementById('gpsStatusText').innerText = 'Grabando en vivo (Protección 2do plano activa)';
+      document.getElementById('txtBgStatus').innerText = 'Grabación en 2do plano activa (No cierres la pestaña)';
+      document.getElementById('pillBgStatus').innerText = 'ACTIVO';
 
       activarWakeLock();
+      activarCanalSegundoPlano();
+      guardarViajeEnVivoEnStorage();
+
+      if (liveTrip.timerInterval) clearInterval(liveTrip.timerInterval);
       liveTrip.timerInterval = setInterval(actualizarCronometroVivo, 1000);
 
-      if (navigator.geolocation) {
-        liveWatchId = navigator.geolocation.watchPosition(
-          procesarPuntoGps,
-          () => {
-            document.getElementById('gpsStatusText').innerText = 'Señal GPS débil. Asegurate de dar permiso de ubicación.';
-          },
-          { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 }
-        );
-      }
+      engancharWatchGps();
       actualizarPanelVivo();
     }
 
-    function procesarPuntoGps(pos) {
-      if (!liveTrip.active) return;
+    function engancharWatchGps() {
+      if (!navigator.geolocation) return;
+      if (liveWatchId !== null) navigator.geolocation.clearWatch(liveWatchId);
+      liveWatchId = navigator.geolocation.watchPosition(
+        procesarPuntoGps,
+        () => {
+          document.getElementById('gpsStatusText').innerText = 'Señal GPS débil. Asegurate de dar permiso de ubicación.';
+        },
+        { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 }
+      );
+    }
+
+    let procesandoSaltoSegundoPlano = false;
+
+    async function procesarPuntoGps(pos) {
+      if (!liveTrip.active || procesandoSaltoSegundoPlano) return;
 
       const lat = pos.coords.latitude;
       const lon = pos.coords.longitude;
       const accuracy = pos.coords.accuracy || 10;
 
-      if (accuracy > 65 && liveTrip.coords.length > 0) return;
+      if (accuracy > 75 && liveTrip.coords.length > 0) return;
 
       const now = Date.now();
       let speedKmh = pos.coords.speed !== null && pos.coords.speed >= 0
@@ -1167,38 +1389,82 @@
 
       if (liveTrip.coords.length > 0) {
         const prev = liveTrip.coords[liveTrip.coords.length - 1];
-        const distKm = calcularDistanciaHaversine(prev.lat, prev.lon, lat, lon);
-        const dtHours = (now - prev.time) / 3600000;
+        const distDirectaKm = calcularDistanciaHaversine(prev.lat, prev.lon, lat, lon);
+        const dtSeconds = (now - (prev.time || liveTrip.lastPointTime || now)) / 1000;
+        const dtHours = dtSeconds / 3600;
 
-        if (distKm < 0.008) return;
+        if (distDirectaKm < 0.008) return;
 
-        if (speedKmh === 0 && dtHours > 0) {
-          speedKmh = Math.min(160, distKm / dtHours);
-        }
+        // Si el celular estuvo en segundo plano y hay un salto > 180 metros o > 25 segundos,
+        // reconstruimos el camino real por las calles (OSRM) para que no trace una línea recta falsa
+        if (distDirectaKm > 0.18 && dtSeconds > 20 && !liveSimInterval) {
+          procesandoSaltoSegundoPlano = true;
+          const rutaVial = await obtenerRutaVialEntrePuntos(prev.lat, prev.lon, lat, lon);
+          procesandoSaltoSegundoPlano = false;
 
-        liveTrip.totalKm += distKm;
-        if (speedKmh >= 70) {
-          liveTrip.fastKm += distKm;
+          if (rutaVial && rutaVial.distKm > 0) {
+            const velMediaTramo = dtHours > 0 ? (rutaVial.distKm / dtHours) : 40;
+            liveTrip.totalKm += rutaVial.distKm;
+            if (velMediaTramo >= 68) {
+              liveTrip.fastKm += rutaVial.distKm;
+            }
+            // Agregar puntos intermedios de las calles reales
+            rutaVial.coords.slice(1).forEach(pt => liveTrip.coords.push(pt));
+            mostrarToast(`2do plano sincronizado: +${rutaVial.distKm.toFixed(2)} km por calles reales`);
+          } else {
+            liveTrip.totalKm += distDirectaKm;
+            if (dtHours > 0 && (distDirectaKm / dtHours) >= 68) liveTrip.fastKm += distDirectaKm;
+            liveTrip.coords.push({ lat: Number(lat.toFixed(5)), lon: Number(lon.toFixed(5)), time: now });
+          }
+        } else {
+          if (speedKmh === 0 && dtHours > 0) {
+            speedKmh = Math.min(160, distDirectaKm / dtHours);
+          }
+          liveTrip.totalKm += distDirectaKm;
+          if (speedKmh >= 70) {
+            liveTrip.fastKm += distDirectaKm;
+          }
+          liveTrip.coords.push({ lat: Number(lat.toFixed(5)), lon: Number(lon.toFixed(5)), time: now });
         }
       } else {
+        liveTrip.coords.push({ lat: Number(lat.toFixed(5)), lon: Number(lon.toFixed(5)), time: now });
         obtenerNombreCalle(lat, lon, true);
       }
 
       liveTrip.currentSpeedKmh = Math.round(speedKmh);
-      liveTrip.coords.push({ lat: Number(lat.toFixed(5)), lon: Number(lon.toFixed(5)), time: now });
+      liveTrip.lastPointTime = now;
 
       const latlngs = liveTrip.coords.map(c => [c.lat, c.lon]);
-      livePolyline.setLatLngs(latlngs);
-      liveMarker.setLatLng([lat, lon]);
-      liveMap.panTo([lat, lon]);
+      if (livePolyline) livePolyline.setLatLngs(latlngs);
+      if (liveMarker) liveMarker.setLatLng([lat, lon]);
+      if (liveMap) liveMap.panTo([lat, lon]);
 
-      if (liveTrip.coords.length % 12 === 0) {
+      if (liveTrip.coords.length % 10 === 0) {
         obtenerNombreCalle(lat, lon, false);
+        actualizarNotificacionSegundoPlano();
       }
 
       clasificarEstiloEnVivo();
       actualizarPanelVivo();
+      guardarViajeEnVivoEnStorage();
     }
+
+    // Al volver a la aplicación después de haber salido o desbloqueado el celular,
+    // fuerza una lectura inmediata de GPS y reconecta el WakeLock
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && liveTrip.active) {
+        activarWakeLock();
+        activarCanalSegundoPlano();
+        engancharWatchGps();
+        if (navigator.geolocation && !liveSimInterval) {
+          navigator.geolocation.getCurrentPosition(procesarPuntoGps, () => {}, {
+            enableHighAccuracy: true,
+            maximumAge: 0,
+            timeout: 8000
+          });
+        }
+      }
+    });
 
     function clasificarEstiloEnVivo() {
       const ratioFast = liveTrip.totalKm > 0.05 ? (liveTrip.fastKm / liveTrip.totalKm) : 0;
@@ -1258,10 +1524,14 @@
       }
       detenerSimulacionGps();
       liberarWakeLock();
+      desactivarCanalSegundoPlano();
       liveTrip.active = false;
+      localStorage.removeItem(LIVE_TRIP_STORAGE_KEY);
       document.getElementById('btnStartLive').classList.remove('hidden');
       document.getElementById('controlesViajeActivo').classList.add('hidden');
       document.getElementById('badgeGpsHeader').classList.add('hidden');
+      document.getElementById('txtBgStatus').innerText = 'Protección en 2do plano lista para activar';
+      document.getElementById('pillBgStatus').innerText = 'Auto-Sync';
     }
 
     function cancelarViajeEnVivo() {
@@ -1299,7 +1569,6 @@
         notaAutomatica = `GPS por ${liveTrip.endStreet}`;
       }
 
-      // Guardamos la lista de coordenadas [lat, lon] comprimida para poder ver el mapa cuando quieras
       const rutaGuardada = liveTrip.coords.map(c => [c.lat, c.lon]);
 
       detenerSensoresVivo();
@@ -1325,7 +1594,6 @@
       saveState();
 
       irASeccion('tablero');
-      // Abrir directamente el visor con el recorrido guardado para confirmar
       verMapaViajeGuardado(nuevoViajeId);
     }
 
@@ -1421,7 +1689,7 @@
       if (btn) btn.innerHTML = `<i class="fa-solid fa-play mr-1 text-clio-500"></i> Simular`;
     }
 
-    // ==================== MODAL VIAJE MANUAL (NUEVO O EDITAR) ====================
+    // ==================== MODAL VIAJE MANUAL (POR "KM" O POR "NUEVO ODÓMETRO") ====================
     function abrirModalViaje(idEditar = null) {
       editandoViajeId = idEditar;
 
@@ -1430,20 +1698,55 @@
         if (!item) return;
         document.getElementById('tituloModalViaje').innerText = 'Editar Recorrido';
         document.getElementById('btnConfirmarViaje').innerText = 'Guardar Cambios';
+        document.getElementById('selectorModoIngresoViaje').classList.add('hidden');
+        modoIngresoViaje = 'km';
         bufferViajeKm = String(item.km);
         estiloViajeSeleccionado = item.estilo || 'calle';
         document.getElementById('inputNotaViaje').value = item.notaPersonalizada || item.nota || '';
       } else {
         document.getElementById('tituloModalViaje').innerText = 'Nuevo Recorrido';
         document.getElementById('btnConfirmarViaje').innerText = 'Descontar Recorrido';
+        document.getElementById('selectorModoIngresoViaje').classList.remove('hidden');
         bufferViajeKm = '0';
         estiloViajeSeleccionado = 'calle';
         document.getElementById('inputNotaViaje').value = '';
+        cambiarModoIngresoViaje('km');
       }
 
       seleccionarEstiloViaje(estiloViajeSeleccionado);
       actualizarDisplayViaje();
       document.getElementById('modalViaje').classList.remove('hidden');
+    }
+
+    function cambiarModoIngresoViaje(modo) {
+      if (modo === 'odometro' && !state.odometroActual) {
+        alert('Primero cargá el odómetro actual de tu tablero para poder calcular viajes por diferencia.');
+        return;
+      }
+      modoIngresoViaje = modo;
+      bufferViajeKm = '0';
+
+      const tabKm = document.getElementById('tabIngreso-km');
+      const tabOdo = document.getElementById('tabIngreso-odometro');
+      const lblPrincipal = document.getElementById('labelInputViajePrincipal');
+      const subOdo = document.getElementById('subtextoOdometroAnterior');
+      const cajaDist = document.getElementById('cajaDistanciaCalculada');
+
+      if (modo === 'km') {
+        tabKm.className = 'py-2 rounded-xl font-bold text-xs bg-clio-500 text-white shadow transition';
+        tabOdo.className = 'py-2 rounded-xl font-bold text-xs text-gray-600 dark:text-gray-400 transition';
+        lblPrincipal.innerText = 'Kilómetros recorridos';
+        subOdo.classList.add('hidden');
+        cajaDist.classList.add('hidden');
+      } else {
+        tabOdo.className = 'py-2 rounded-xl font-bold text-xs bg-clio-500 text-white shadow transition';
+        tabKm.className = 'py-2 rounded-xl font-bold text-xs text-gray-600 dark:text-gray-400 transition';
+        lblPrincipal.innerText = 'Nuevo Odómetro del Tablero';
+        subOdo.classList.remove('hidden');
+        document.getElementById('valOdometroAnterior').innerText = Math.round(state.odometroActual).toLocaleString('es-AR');
+        cajaDist.classList.remove('hidden');
+      }
+      actualizarDisplayViaje();
     }
 
     function cerrarModalViaje() {
@@ -1456,8 +1759,8 @@
       ['calle', 'mixto', 'ruta'].forEach(e => {
         const chip = document.getElementById(`chipEstilo-${e}`);
         chip.className = e === estilo
-          ? 'py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 bg-clio-500 text-white shadow-sm'
-          : 'py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 bg-white dark:bg-[#1f2622] text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-white/10';
+          ? 'py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 bg-clio-500 text-white shadow-sm'
+          : 'py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 bg-white dark:bg-[#1f2622] text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-white/10';
       });
       actualizarDisplayViaje();
     }
@@ -1473,22 +1776,64 @@
       actualizarDisplayViaje();
     }
 
-    function setQuickKm(val) {
-      bufferViajeKm = val;
+    function setQuickKm(valSumar) {
+      if (modoIngresoViaje === 'odometro' && state.odometroActual) {
+        const base = parseFloat(bufferViajeKm) > state.odometroActual ? parseFloat(bufferViajeKm) : Math.round(state.odometroActual);
+        bufferViajeKm = String(base + Number(valSumar));
+      } else {
+        bufferViajeKm = String(valSumar);
+      }
       actualizarDisplayViaje();
+    }
+
+    function obtenerKmEfectivosDelModal() {
+      const val = parseFloat(bufferViajeKm) || 0;
+      if (modoIngresoViaje === 'km') {
+        return val;
+      } else {
+        const odoAnt = Number(state.odometroActual) || 0;
+        return val > odoAnt ? Number((val - odoAnt).toFixed(1)) : 0;
+      }
     }
 
     function actualizarDisplayViaje() {
       document.getElementById('displayViajeKm').innerText = bufferViajeKm;
-      const km = parseFloat(bufferViajeKm) || 0;
+      const kmEfectivos = obtenerKmEfectivosDelModal();
       const consumo = state.consumos[estiloViajeSeleccionado];
-      const litros = (km * consumo) / 100;
+      const litros = (kmEfectivos * consumo) / 100;
+
       document.getElementById('previewLitrosViaje').innerText = `-${litros.toFixed(2)} L`;
+
+      if (modoIngresoViaje === 'odometro') {
+        const elDist = document.getElementById('previewDistanciaPorOdo');
+        const val = parseFloat(bufferViajeKm) || 0;
+        const odoAnt = Number(state.odometroActual) || 0;
+        if (val === 0) {
+          elDist.innerText = '+0.0 km';
+          elDist.className = 'text-sm font-black text-clio-500 dark:text-clio-300';
+        } else if (val <= odoAnt) {
+          elDist.innerText = `Faltan dígitos (≤ ${Math.round(odoAnt)})`;
+          elDist.className = 'text-xs font-bold text-amber-500';
+        } else {
+          elDist.innerText = `+${kmEfectivos.toFixed(1)} km`;
+          elDist.className = 'text-sm font-black text-emerald-500';
+        }
+      }
     }
 
     function guardarViaje() {
-      const km = parseFloat(bufferViajeKm);
-      if (isNaN(km) || km <= 0) return;
+      const km = obtenerKmEfectivosDelModal();
+      if (isNaN(km) || km <= 0) {
+        if (modoIngresoViaje === 'odometro') {
+          alert(`El nuevo odómetro debe ser mayor al actual (${Math.round(state.odometroActual)} km).`);
+        }
+        return;
+      }
+
+      // Aviso preventivo por si le erró por un cero de más en el odómetro
+      if (modoIngresoViaje === 'odometro' && km > 600) {
+        if (!confirm(`La diferencia de odómetro da un viaje de ${km} km. ¿Es correcto?`)) return;
+      }
 
       const consumo = state.consumos[estiloViajeSeleccionado];
       const litrosGastados = (km * consumo) / 100;
@@ -1723,7 +2068,7 @@
       saveState();
     }
 
-    // ==================== HISTORIAL (CON BOTÓN DE MAPA GUARDADO) ====================
+    // ==================== HISTORIAL ====================
     function renderHistorial() {
       const recientesContainer = document.getElementById('listaRecientes');
       const completoContainer = document.getElementById('listaHistorialCompleto');
@@ -1844,16 +2189,26 @@
     function resetearAppCompleta() {
       if (confirm('¿Seguro que querés reiniciar todos los datos de la app?')) {
         localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(LIVE_TRIP_STORAGE_KEY);
         localStorage.removeItem('miclio_v2_data');
         location.reload();
       }
     }
 
-    // ==================== INICIO ====================
+    // ==================== INICIO Y RESTAURACIÓN DE VIAJE ACTIVO ====================
     window.addEventListener('DOMContentLoaded', () => {
       renderAll();
       if (!state.odometroActual) {
         document.getElementById('modalOdometroInicial').classList.remove('hidden');
+      }
+
+      // Si había un viaje en vivo grabándose y el sistema recargó la app, lo restaura solo
+      const savedLive = JSON.parse(localStorage.getItem(LIVE_TRIP_STORAGE_KEY));
+      if (savedLive && savedLive.active) {
+        liveTrip = Object.assign(liveTrip, savedLive);
+        irASeccion('vivo');
+        iniciarViajeEnVivo(true);
+        mostrarToast('Viaje en vivo recuperado automáticamente');
       }
     });
 

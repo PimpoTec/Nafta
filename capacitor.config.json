@@ -1,0 +1,9 @@
+{
+  "appId": "com.francisco.miclionafta",
+  "appName": "MiClio Nafta",
+  "webDir": "www",
+  "server": {
+    "url": "https://nafta-phi.vercel.app/",
+    "cleartext": true
+  }
+}

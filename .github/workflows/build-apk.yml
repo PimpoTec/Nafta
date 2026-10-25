@@ -1,0 +1,52 @@
+name: Compilar APK MiClio
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar código del repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Configurar Java 17 para Android
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 17
+
+      - name: Preparar proyecto Capacitor y permisos GPS
+        run: |
+          mkdir -p www
+          cp index.html www/
+          if [ -f manifest.json ]; then cp manifest.json www/; fi
+          if [ -f sw.js ]; then cp sw.js www/; fi
+          npm init -y
+          npm install @capacitor/core @capacitor/cli @capacitor/android
+          npx cap add android
+          
+          # Inyectar permisos de GPS y Segundo Plano en AndroidManifest.xml
+          sed -i 's/<\/manifest>/<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" \/><uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" \/><uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" \/><uses-permission android:name="android.permission.FOREGROUND_SERVICE" \/><uses-permission android:name="android.permission.WAKE_LOCK" \/><\/manifest>/g' android/app/src/main/AndroidManifest.xml
+          
+          npx cap sync android
+
+      - name: Compilar archivo APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Subir APK listo para descargar
+        uses: actions/upload-artifact@v4
+        with:
+          name: MiClio-Nafta-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk

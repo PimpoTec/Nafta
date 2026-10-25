@@ -7,31 +7,37 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Descargar código del repositorio
         uses: actions/checkout@v4
 
-      - name: Configurar Node.js
+      - name: Configurar Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
-      - name: Configurar Java 21 para Android
-        uses: actions/setup-java@v4
+      - name: Configurar Java 17 para Android
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
-          java-version: 21
+          java-version: 17
 
-      - name: Preparar proyecto Capacitor y permisos GPS
+      - name: Preparar proyecto Capacitor 6 y permisos GPS
         run: |
           mkdir -p www
           cp index.html www/
           if [ -f manifest.json ]; then cp manifest.json www/; fi
           if [ -f sw.js ]; then cp sw.js www/; fi
+          
+          # Si no existe capacitor.config.json, crea uno válido automáticamente
+          if [ ! -f capacitor.config.json ]; then
+            echo '{"appId":"com.francisco.miclionafta","appName":"MiClio Nafta","webDir":"www"}' > capacitor.config.json
+          fi
+
           npm init -y
-          npm install @capacitor/core @capacitor/cli @capacitor/android
+          npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6
           npx cap add android
           
           # Inyectar permisos de GPS y Segundo Plano en AndroidManifest.xml
